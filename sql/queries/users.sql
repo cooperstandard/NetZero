@@ -7,3 +7,9 @@ VALUES (
   $1
 )
 RETURNING *;
+
+-- name: GetUsers :many
+SELECT * FROM users;
+
+-- name: RemoveAllUsers :exec
+DELETE FROM users;
