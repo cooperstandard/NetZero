@@ -28,12 +28,12 @@ func (cfg *apiConfig) handlerOneChirp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ret := returnVals{
-			ID:        chirp.ID,
-			CreatedAt: chirp.CreatedAt,
-			Body:      chirp.Body,
-			UpdatedAt: chirp.UpdatedAt,
-			UserID:    chirp.UserID,
-		}
+		ID:        chirp.ID,
+		CreatedAt: chirp.CreatedAt,
+		Body:      chirp.Body,
+		UpdatedAt: chirp.UpdatedAt,
+		UserID:    chirp.UserID,
+	}
 
 	respondWithJSON(w, 200, ret)
 }
