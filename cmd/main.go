@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/cooperstandard/NetZero/internal/auth"
 	"github.com/cooperstandard/NetZero/internal/database"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -49,8 +50,15 @@ func main() {
 
 	apiMux := http.NewServeMux()
 
+	// TODO: eventually, dynamically create a slice of routes on startup based on env.platform and then register with a for each
+	// type route struct {
+	// 	pattern string
+	// 	handler http.HandlerFunc
+	// }
+
 	// routes
-	apiMux.HandleFunc(formPath("POST", "/reset"), apiCfg.handleReset)
+	register(apiMux, formPath("POST", "/reset"), apiCfg.adminAuth(apiCfg.handleReset))
+
 	srv := &http.Server{
 		Addr:    ":" + port,
 		Handler: apiMux,
@@ -60,11 +68,30 @@ func main() {
 	log.Fatal(srv.ListenAndServe())
 }
 
+func register(mux *http.ServeMux, pattern string, handler http.HandlerFunc) {
+	mux.HandleFunc(pattern, handler)
+}
+
 func formPath(method, route string) string {
 	return fmt.Sprintf("%s %s%s", method, basePath, route)
 }
 
-func (cfg *apiConfig) handleReset(w http.ResponseWriter, r *http.Request) {
+func (cfg apiConfig) handleReset(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%v\n", r.Header.Get("Authorization"))
 	w.WriteHeader(204)
+}
+
+func (cfg apiConfig) adminAuth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token, err := auth.GetBearerToken(r.Header)
+		if err != nil || token != cfg.adminKey {
+			w.WriteHeader(401)
+			return
+		}
+		next.ServeHTTP(w, r)
+	}
+}
+
+func (cfg apiConfig) userAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return next
 }
