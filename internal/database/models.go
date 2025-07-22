@@ -5,14 +5,37 @@
 package database
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
 )
 
+type Debt struct {
+	ID            uuid.UUID
+	Amount        string
+	TransactionID uuid.UUID
+	Debtor        uuid.UUID
+	Creditor      uuid.UUID
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	Paid          bool
+}
+
+type Transaction struct {
+	ID          uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	Title       string
+	Description sql.NullString
+	AuthorID    uuid.NullUUID
+	Amount      string
+}
+
 type User struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Email     string
+	ID             uuid.UUID
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	Email          string
+	HashedPassword string
 }
