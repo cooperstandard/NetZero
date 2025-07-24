@@ -22,6 +22,28 @@ type Debt struct {
 	Paid          bool
 }
 
+type Group struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Name      string
+}
+
+type GroupMember struct {
+	UserID  uuid.NullUUID
+	GroupID uuid.NullUUID
+}
+
+type RefreshToken struct {
+	Token     string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Email     string
+	UserID    uuid.UUID
+	ExpiresAt time.Time
+	RevokedAt sql.NullTime
+}
+
 type Transaction struct {
 	ID          uuid.UUID
 	CreatedAt   time.Time
@@ -29,11 +51,13 @@ type Transaction struct {
 	Title       string
 	Description sql.NullString
 	AuthorID    uuid.NullUUID
+	GroupID     uuid.UUID
 	Amount      string
 }
 
 type User struct {
 	ID             uuid.UUID
+	Name           sql.NullString
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	Email          string

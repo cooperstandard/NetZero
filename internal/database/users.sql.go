@@ -7,25 +7,28 @@ package database
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, created_at, updated_at, email, hashed_password)
-    VALUES (gen_random_uuid (), NOW(), NOW(), $1, $2)
+INSERT INTO users (id, created_at, updated_at, email, hashed_password, name)
+    VALUES (gen_random_uuid (), NOW(), NOW(), $1, $2, $3)
 RETURNING
-    id, created_at, updated_at, email, hashed_password
+    id, name, created_at, updated_at, email, hashed_password
 `
 
 type CreateUserParams struct {
 	Email          string
 	HashedPassword string
+	Name           sql.NullString
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.Email, arg.HashedPassword)
+	row := q.db.QueryRowContext(ctx, createUser, arg.Email, arg.HashedPassword, arg.Name)
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.Name,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Email,
@@ -36,7 +39,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 
 const getUsers = `-- name: GetUsers :many
 SELECT
-    id, created_at, updated_at, email, hashed_password
+    id, name, created_at, updated_at, email, hashed_password
 FROM
     users
 `
@@ -52,6 +55,7 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 		var i User
 		if err := rows.Scan(
 			&i.ID,
+			&i.Name,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Email,

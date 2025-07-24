@@ -13,16 +13,17 @@ import (
 )
 
 const createTransaction = `-- name: CreateTransaction :one
-INSERT INTO transactions (id, created_at, updated_at, title, description, author_id, amount)
-    VALUES (gen_random_uuid (), NOW(), NOW(), $1, $2, $3, $4)
+INSERT INTO transactions (id, created_at, updated_at, title, description, author_id, group_id, amount)
+    VALUES (gen_random_uuid (), NOW(), NOW(), $1, $2, $3, $4, $5)
 RETURNING
-    id, created_at, updated_at, title, description, author_id, amount
+    id, created_at, updated_at, title, description, author_id, group_id, amount
 `
 
 type CreateTransactionParams struct {
 	Title       string
 	Description sql.NullString
 	AuthorID    uuid.NullUUID
+	GroupID     uuid.UUID
 	Amount      string
 }
 
@@ -31,6 +32,7 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		arg.Title,
 		arg.Description,
 		arg.AuthorID,
+		arg.GroupID,
 		arg.Amount,
 	)
 	var i Transaction
@@ -41,7 +43,90 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		&i.Title,
 		&i.Description,
 		&i.AuthorID,
+		&i.GroupID,
 		&i.Amount,
 	)
 	return i, err
+}
+
+const getTransactionsByGroup = `-- name: GetTransactionsByGroup :many
+SELECT
+    id, created_at, updated_at, title, description, author_id, group_id, amount
+FROM
+    transactions
+WHERE
+    group_id = $1
+`
+
+func (q *Queries) GetTransactionsByGroup(ctx context.Context, groupID uuid.UUID) ([]Transaction, error) {
+	rows, err := q.db.QueryContext(ctx, getTransactionsByGroup, groupID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Transaction
+	for rows.Next() {
+		var i Transaction
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Description,
+			&i.AuthorID,
+			&i.GroupID,
+			&i.Amount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTransactonsByAuthor = `-- name: GetTransactonsByAuthor :many
+SELECT
+    id, created_at, updated_at, title, description, author_id, group_id, amount
+FROM
+    transactions
+WHERE
+    author_id = $1
+`
+
+func (q *Queries) GetTransactonsByAuthor(ctx context.Context, authorID uuid.NullUUID) ([]Transaction, error) {
+	rows, err := q.db.QueryContext(ctx, getTransactonsByAuthor, authorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Transaction
+	for rows.Next() {
+		var i Transaction
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Description,
+			&i.AuthorID,
+			&i.GroupID,
+			&i.Amount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
