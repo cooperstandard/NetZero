@@ -22,7 +22,7 @@ RETURNING
 type CreateTransactionParams struct {
 	Title       string
 	Description sql.NullString
-	AuthorID    uuid.NullUUID
+	AuthorID    uuid.UUID
 	GroupID     uuid.UUID
 	Amount      string
 }
@@ -99,7 +99,7 @@ WHERE
     author_id = $1
 `
 
-func (q *Queries) GetTransactonsByAuthor(ctx context.Context, authorID uuid.NullUUID) ([]Transaction, error) {
+func (q *Queries) GetTransactonsByAuthor(ctx context.Context, authorID uuid.UUID) ([]Transaction, error) {
 	rows, err := q.db.QueryContext(ctx, getTransactonsByAuthor, authorID)
 	if err != nil {
 		return nil, err

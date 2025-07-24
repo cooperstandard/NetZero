@@ -119,7 +119,10 @@ func (q *Queries) GetUsersByGroup(ctx context.Context, arg GetUsersByGroupParams
 }
 
 const joinGroup = `-- name: JoinGroup :one
-INSERT INTO group_members (user_id, group_id) VALUES ($1, $2) RETURNING user_id, group_id
+INSERT INTO group_members (user_id, group_id)
+    VALUES ($1, $2)
+RETURNING
+    user_id, group_id
 `
 
 type JoinGroupParams struct {

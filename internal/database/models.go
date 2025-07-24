@@ -50,7 +50,7 @@ type Transaction struct {
 	UpdatedAt   time.Time
 	Title       string
 	Description sql.NullString
-	AuthorID    uuid.NullUUID
+	AuthorID    uuid.UUID
 	GroupID     uuid.UUID
 	Amount      string
 }
