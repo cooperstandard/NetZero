@@ -13,11 +13,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
-
 func main() {
 	const port = "8080"
 	const basePath = "/api/v1"
 
+	// TODO: add sample .env in version control
 	godotenv.Load()
 	dbURL := os.Getenv("DB_URL")
 	if dbURL == "" {
