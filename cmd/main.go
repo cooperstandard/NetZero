@@ -2,28 +2,21 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/cooperstandard/NetZero/internal/auth"
 	"github.com/cooperstandard/NetZero/internal/database"
+	"github.com/cooperstandard/NetZero/internal/routes"
+	"github.com/cooperstandard/NetZero/internal/util"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
-type apiConfig struct {
-	db          *database.Queries
-	tokenSecret string
-	adminKey    string
-	platform    string
-}
-
-const basePath = "/api/v1"
 
 func main() {
 	const port = "8080"
+	const basePath = "/api/v1"
 
 	godotenv.Load()
 	dbURL := os.Getenv("DB_URL")
@@ -41,11 +34,11 @@ func main() {
 	}
 	dbQueries := database.New(dbConn)
 
-	apiCfg := apiConfig{
-		db:          dbQueries,
-		platform:    platform,
-		tokenSecret: os.Getenv("TOKEN_SECRET"),
-		adminKey:    os.Getenv("ADMIN_KEY"),
+	apiCfg := routes.ApiConfig{
+		DB:          dbQueries,
+		Platform:    platform,
+		TokenSecret: os.Getenv("TOKEN_SECRET"),
+		AdminKey:    os.Getenv("ADMIN_KEY"),
 	}
 
 	apiMux := http.NewServeMux()
@@ -57,7 +50,7 @@ func main() {
 	// }
 
 	// routes
-	register(apiMux, formPath("POST", "/reset"), apiCfg.adminAuth(apiCfg.handleReset))
+	register(apiMux, util.FormPath("POST", "/reset", basePath), apiCfg.AdminAuth(apiCfg.HandleReset))
 
 	srv := &http.Server{
 		Addr:    ":" + port,
@@ -70,28 +63,4 @@ func main() {
 
 func register(mux *http.ServeMux, pattern string, handler http.HandlerFunc) {
 	mux.HandleFunc(pattern, handler)
-}
-
-func formPath(method, route string) string {
-	return fmt.Sprintf("%s %s%s", method, basePath, route)
-}
-
-func (cfg apiConfig) handleReset(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("%v\n", r.Header.Get("Authorization"))
-	w.WriteHeader(204)
-}
-
-func (cfg apiConfig) adminAuth(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		token, err := auth.GetBearerToken(r.Header)
-		if err != nil || token != cfg.adminKey {
-			w.WriteHeader(401)
-			return
-		}
-		next.ServeHTTP(w, r)
-	}
-}
-
-func (cfg apiConfig) userAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return next
 }
