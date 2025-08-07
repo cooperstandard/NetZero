@@ -5,4 +5,5 @@ case "$1" in
     ;;
   format)
     go fmt ./...
+    ;;
 esac
