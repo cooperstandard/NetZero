@@ -37,7 +37,7 @@ func (cfg *ApiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	expireIn := time.Duration(params.ExpiresInSecs) * time.Second
 	if params.ExpiresInSecs < 1 || params.ExpiresInSecs > (3600) {
-		expireIn =  time.Hour
+		expireIn = time.Hour
 	}
 
 	jwt, err := auth.MakeJWT(user.ID, cfg.TokenSecret, expireIn)
@@ -55,14 +55,13 @@ func (cfg *ApiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	})
 
 	res := User{
-		ID:        user.ID,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		Email:     user.Email,
-		Token:     jwt,
+		ID:           user.ID,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
+		Email:        user.Email,
+		Token:        jwt,
 		RefreshToken: refreshToken,
 	}
 	util.RespondWithJSON(w, 200, res)
 
 }
-

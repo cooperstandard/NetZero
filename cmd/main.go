@@ -49,8 +49,18 @@ func main() {
 	// 	handler http.HandlerFunc
 	// }
 
-	// routes
-	register(apiMux, util.FormPath("POST", "/reset", basePath), apiCfg.AdminAuth(apiCfg.HandleReset))
+	paths := make(map[string]http.HandlerFunc)
+
+	// add routes
+	paths[util.FormPath("POST", "/reset", basePath)] = apiCfg.AdminAuth(apiCfg.HandleReset)
+	paths[util.FormPath("POST", "/login", basePath)] = apiCfg.HandleLogin
+	paths[util.FormPath("POST", "/register", basePath)] = apiCfg.HandleRegister
+
+	// register routes
+	for k, v := range paths {
+		register(apiMux, k, v)
+
+	}
 
 	srv := &http.Server{
 		Addr:    ":" + port,
