@@ -1,8 +1,0 @@
-{
-  "dev": [
-    {"name": "reset", "enabled": true}
-  ],
-  "prod": [
-    {"name": "reset", "enabled": false}
-  ]
-}

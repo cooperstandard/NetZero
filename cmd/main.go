@@ -55,6 +55,7 @@ func main() {
 	paths[util.FormPath("POST", "/reset", basePath)] = apiCfg.AdminAuth(apiCfg.HandleReset)
 	paths[util.FormPath("POST", "/login", basePath)] = apiCfg.HandleLogin
 	paths[util.FormPath("POST", "/register", basePath)] = apiCfg.HandleRegister
+	paths[util.FormPath("POST", "/token/refresh", basePath)] = apiCfg.HandleRefreshToken
 
 	// register routes
 	for k, v := range paths {
