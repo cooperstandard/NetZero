@@ -14,7 +14,7 @@ func (cfg *ApiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Email         string `json:"email"`
 		Password      string `json:"password"`
-		ExpiresInSecs int    `json:"expires_in_seconds"` // TODO: for testing, configure this in the environment
+		ExpiresInSecs int    `json:"expiresInSeconds"` // TODO: for testing, configure this in the environment
 	}
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}

@@ -1,0 +1,23 @@
+meta {
+  name: refreshToken
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{basepath}}/token/refresh
+  body: json
+  auth: inherit
+}
+
+body:json {
+  { //todo
+    "email": "testEmail",
+    "password": "testPassword",
+    "expiresInSeconds": 120
+  }
+}
+
+settings {
+  encodeUrl: true
+}

@@ -73,4 +73,3 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .vscode
-todo.md

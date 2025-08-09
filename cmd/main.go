@@ -52,7 +52,10 @@ func main() {
 	paths := make(map[string]http.HandlerFunc)
 
 	// add routes
-	paths[util.FormPath("POST", "/reset", basePath)] = apiCfg.AdminAuth(apiCfg.HandleReset)
+	paths[util.FormPath("POST", "/admin/reset", basePath)] = apiCfg.AdminAuthMiddleware(apiCfg.HandleReset)
+	paths[util.FormPath("GET", "/admin/users", basePath)] = apiCfg.AdminAuthMiddleware(apiCfg.HandleGetUsers)
+	// paths[util.FormPath("GET", "/admin/users", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleGetUsers)
+	// TODO: add a health endpoint for testing auth and server liveness.
 	paths[util.FormPath("POST", "/login", basePath)] = apiCfg.HandleLogin
 	paths[util.FormPath("POST", "/register", basePath)] = apiCfg.HandleRegister
 	paths[util.FormPath("POST", "/token/refresh", basePath)] = apiCfg.HandleRefreshToken

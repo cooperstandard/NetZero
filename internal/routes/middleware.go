@@ -7,7 +7,7 @@ import (
 	"github.com/cooperstandard/NetZero/internal/util"
 )
 
-func (cfg *ApiConfig) AdminAuth(next http.HandlerFunc) http.HandlerFunc {
+func (cfg *ApiConfig) AdminAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token, err := auth.GetBearerToken(r.Header)
 		if err != nil || token != cfg.AdminKey {
