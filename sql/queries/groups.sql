@@ -4,6 +4,12 @@ INSERT INTO GROUPS (id, created_at, updated_at, name)
 RETURNING
     *;
 
+-- name: JoinGroup :one
+INSERT INTO group_members (user_id, group_id)
+    VALUES ($1, $2)
+RETURNING
+    *;
+
 -- name: GetGroupsByUser :many
 SELECT
     id,
@@ -26,9 +32,4 @@ WHERE
     group_id = $1
     AND id != $2;
 
--- name: JoinGroup :one
-INSERT INTO group_members (user_id, group_id)
-    VALUES ($1, $2)
-RETURNING
-    *;
 

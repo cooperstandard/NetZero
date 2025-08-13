@@ -7,4 +7,5 @@
 * create and modify groups
 * add transaction
 * get transactions by debtor and creditor
-* pay debt
+* pay debts
+* cloc

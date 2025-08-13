@@ -22,3 +22,10 @@ type User struct {
 	Token        string    `json:"token"`
 	RefreshToken string    `json:"refresh_token" omitempty:"refresh_token"`
 }
+
+type Group struct {
+	Name      string    `json:"name"`
+	CreateAt  time.Time `json:"create_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	ID        uuid.UUID `json:"id"`
+}
