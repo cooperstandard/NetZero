@@ -9,7 +9,7 @@ import (
 	"github.com/cooperstandard/NetZero/internal/util"
 )
 
-func (cfg *ApiConfig) HandleRegister(w http.ResponseWriter, r *http.Request) {
+func (cfg *APIConfig) HandleRegister(w http.ResponseWriter, r *http.Request) {
 
 	type parameters struct {
 		Email    string `json:"email"`

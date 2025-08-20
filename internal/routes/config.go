@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type ApiConfig struct {
+type APIConfig struct {
 	DB          *database.Queries
 	TokenSecret string
 	AdminKey    string

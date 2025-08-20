@@ -7,7 +7,7 @@ import (
 	"github.com/cooperstandard/NetZero/internal/util"
 )
 
-func (cfg *ApiConfig) HandleCreateGroup(w http.ResponseWriter, r *http.Request) {
+func (cfg *APIConfig) HandleCreateGroup(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Name string `json:"name"`
 	}
@@ -34,6 +34,5 @@ func (cfg *ApiConfig) HandleCreateGroup(w http.ResponseWriter, r *http.Request) 
 	}
 
 	util.RespondWithJSON(w, 200, ret)
-
 
 }

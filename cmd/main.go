@@ -34,7 +34,7 @@ func main() {
 	}
 	dbQueries := database.New(dbConn)
 
-	apiCfg := routes.ApiConfig{
+	apiCfg := routes.APIConfig{
 		DB:          dbQueries,
 		Platform:    platform,
 		TokenSecret: os.Getenv("TOKEN_SECRET"),
@@ -60,6 +60,7 @@ func main() {
 	paths[util.FormPath("POST", "/register", basePath)] = apiCfg.HandleRegister
 	paths[util.FormPath("POST", "/token/refresh", basePath)] = apiCfg.HandleRefreshToken
 	paths[util.FormPath("POST", "/groups", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleCreateGroup)
+	paths[util.FormPath("GET", "/health", basePath)] = routes.HandleHealth
 
 	// register routes
 	for k, v := range paths {

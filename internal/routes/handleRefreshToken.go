@@ -8,7 +8,7 @@ import (
 	"github.com/cooperstandard/NetZero/internal/util"
 )
 
-func (cfg *ApiConfig) HandleRefreshToken(w http.ResponseWriter, r *http.Request) {
+func (cfg *APIConfig) HandleRefreshToken(w http.ResponseWriter, r *http.Request) {
 	token, err := auth.GetBearerToken(r.Header)
 	if err != nil {
 		util.RespondWithError(w, 401, "Unauthorized", err)

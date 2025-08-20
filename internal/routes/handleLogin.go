@@ -10,7 +10,7 @@ import (
 	"github.com/cooperstandard/NetZero/internal/util"
 )
 
-func (cfg *ApiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
+func (cfg *APIConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Email         string `json:"email"`
 		Password      string `json:"password"`

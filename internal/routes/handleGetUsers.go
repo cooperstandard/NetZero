@@ -8,7 +8,7 @@ import (
 )
 
 // TODO: this should only be available in dev
-func (cfg *ApiConfig) HandleGetUsers(w http.ResponseWriter, r *http.Request) {
+func (cfg *APIConfig) HandleGetUsers(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%v\n", r.Header.Get("Authorization"))
 	users, err := cfg.DB.GetUsers(r.Context())
 

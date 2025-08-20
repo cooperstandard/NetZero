@@ -7,7 +7,7 @@ import (
 )
 
 // TODO: this should only be available in dev
-func (cfg *ApiConfig) HandleReset(w http.ResponseWriter, r *http.Request) {
+func (cfg *APIConfig) HandleReset(w http.ResponseWriter, r *http.Request) {
 	err := cfg.DB.RemoveAllUsers(r.Context())
 
 	if err != nil {
