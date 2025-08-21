@@ -7,3 +7,5 @@
 * add transaction
 * get transactions by debtor and creditor
 * pay debts
+* github oauth
+* better open buffer management in nvim
