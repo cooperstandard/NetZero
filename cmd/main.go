@@ -54,13 +54,18 @@ func main() {
 	// add routes
 	paths[util.FormPath("POST", "/admin/reset", basePath)] = apiCfg.AdminAuthMiddleware(apiCfg.HandleReset)
 	paths[util.FormPath("GET", "/admin/users", basePath)] = apiCfg.AdminAuthMiddleware(apiCfg.HandleGetUsers)
+	paths[util.FormPath("GET", "/admin/groups", basePath)] = apiCfg.AdminAuthMiddleware(apiCfg.HandleGetUsers)
+	paths[util.FormPath("GET", "/admin/transactions", basePath)] = apiCfg.AdminAuthMiddleware(apiCfg.HandleGetUsers)
 	// paths[util.FormPath("GET", "/admin/users", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleGetUsers)
 	// TODO: add a health endpoint for testing auth and server liveness.
 	paths[util.FormPath("POST", "/login", basePath)] = apiCfg.HandleLogin
 	paths[util.FormPath("POST", "/register", basePath)] = apiCfg.HandleRegister
 	paths[util.FormPath("POST", "/token/refresh", basePath)] = apiCfg.HandleRefreshToken
 	paths[util.FormPath("POST", "/groups", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleCreateGroup)
-	paths[util.FormPath("GET", "/health", basePath)] = routes.HandleHealth
+
+	if apiCfg.Platform == "dev" {
+		paths[util.FormPath("GET", "/health", basePath)] = routes.HandleHealth
+	}
 
 	// register routes
 	for k, v := range paths {
