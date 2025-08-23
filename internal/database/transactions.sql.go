@@ -20,11 +20,11 @@ RETURNING
 `
 
 type CreateTransactionParams struct {
-	Title       string
-	Description sql.NullString
-	AuthorID    uuid.UUID
-	GroupID     uuid.UUID
-	Amount      string
+	Title       string         `json:"title"`
+	Description sql.NullString `json:"description"`
+	AuthorID    uuid.UUID      `json:"author_id"`
+	GroupID     uuid.UUID      `json:"group_id"`
+	Amount      string         `json:"amount"`
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error) {

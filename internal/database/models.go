@@ -12,54 +12,54 @@ import (
 )
 
 type Debt struct {
-	ID            uuid.UUID
-	Amount        string
-	TransactionID uuid.UUID
-	Debtor        uuid.UUID
-	Creditor      uuid.UUID
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	Paid          bool
+	ID            uuid.UUID `json:"id"`
+	Amount        string    `json:"amount"`
+	TransactionID uuid.UUID `json:"transaction_id"`
+	Debtor        uuid.UUID `json:"debtor"`
+	Creditor      uuid.UUID `json:"creditor"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	Paid          bool      `json:"paid"`
 }
 
 type Group struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Name      string
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name"`
 }
 
 type GroupMember struct {
-	UserID  uuid.NullUUID
-	GroupID uuid.NullUUID
+	UserID  uuid.NullUUID `json:"user_id"`
+	GroupID uuid.NullUUID `json:"group_id"`
 }
 
 type RefreshToken struct {
-	Token     string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Email     string
-	UserID    uuid.UUID
-	ExpiresAt time.Time
-	RevokedAt sql.NullTime
+	Token     string       `json:"token"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
+	Email     string       `json:"email"`
+	UserID    uuid.UUID    `json:"user_id"`
+	ExpiresAt time.Time    `json:"expires_at"`
+	RevokedAt sql.NullTime `json:"revoked_at"`
 }
 
 type Transaction struct {
-	ID          uuid.UUID
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Title       string
-	Description sql.NullString
-	AuthorID    uuid.UUID
-	GroupID     uuid.UUID
-	Amount      string
+	ID          uuid.UUID      `json:"id"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	Title       string         `json:"title"`
+	Description sql.NullString `json:"description"`
+	AuthorID    uuid.UUID      `json:"author_id"`
+	GroupID     uuid.UUID      `json:"group_id"`
+	Amount      string         `json:"amount"`
 }
 
 type User struct {
-	ID             uuid.UUID
-	Name           sql.NullString
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	Email          string
-	HashedPassword string
+	ID             uuid.UUID      `json:"id"`
+	Name           sql.NullString `json:"name"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+	Email          string         `json:"email"`
+	HashedPassword string         `json:"hashed_password"`
 }

@@ -21,10 +21,10 @@ RETURNING
 `
 
 type CreateTokenParams struct {
-	Token     string
-	Email     string
-	UserID    uuid.UUID
-	ExpiresAt time.Time
+	Token     string    `json:"token"`
+	Email     string    `json:"email"`
+	UserID    uuid.UUID `json:"user_id"`
+	ExpiresAt time.Time `json:"expires_at"`
 }
 
 func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (RefreshToken, error) {
@@ -85,8 +85,8 @@ RETURNING
 `
 
 type RevokeTokenParams struct {
-	RevokedAt sql.NullTime
-	Token     string
+	RevokedAt sql.NullTime `json:"revoked_at"`
+	Token     string       `json:"token"`
 }
 
 func (q *Queries) RevokeToken(ctx context.Context, arg RevokeTokenParams) (RefreshToken, error) {

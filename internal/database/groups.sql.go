@@ -61,9 +61,9 @@ WHERE
 `
 
 type GetGroupsByUserRow struct {
-	ID        uuid.UUID
-	Name      string
-	CreatedAt time.Time
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (q *Queries) GetGroupsByUser(ctx context.Context, userID uuid.NullUUID) ([]GetGroupsByUserRow, error) {
@@ -92,7 +92,8 @@ func (q *Queries) GetGroupsByUser(ctx context.Context, userID uuid.NullUUID) ([]
 const getUsersByGroup = `-- name: GetUsersByGroup :many
 SELECT
     id,
-    name
+    name,
+    email
 FROM
     users
     JOIN group_members ON users.id = group_members.user_id
@@ -101,8 +102,9 @@ WHERE
 `
 
 type GetUsersByGroupRow struct {
-	ID   uuid.UUID
-	Name sql.NullString
+	ID    uuid.UUID      `json:"id"`
+	Name  sql.NullString `json:"name"`
+	Email string         `json:"email"`
 }
 
 func (q *Queries) GetUsersByGroup(ctx context.Context, groupID uuid.NullUUID) ([]GetUsersByGroupRow, error) {
@@ -114,7 +116,7 @@ func (q *Queries) GetUsersByGroup(ctx context.Context, groupID uuid.NullUUID) ([
 	var items []GetUsersByGroupRow
 	for rows.Next() {
 		var i GetUsersByGroupRow
-		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+		if err := rows.Scan(&i.ID, &i.Name, &i.Email); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -136,8 +138,8 @@ RETURNING
 `
 
 type JoinGroupParams struct {
-	UserID  uuid.NullUUID
-	GroupID uuid.NullUUID
+	UserID  uuid.NullUUID `json:"user_id"`
+	GroupID uuid.NullUUID `json:"group_id"`
 }
 
 func (q *Queries) JoinGroup(ctx context.Context, arg JoinGroupParams) (GroupMember, error) {

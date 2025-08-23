@@ -19,10 +19,10 @@ RETURNING
 `
 
 type CreateDebtParams struct {
-	Amount        string
-	TransactionID uuid.UUID
-	Debtor        uuid.UUID
-	Creditor      uuid.UUID
+	Amount        string    `json:"amount"`
+	TransactionID uuid.UUID `json:"transaction_id"`
+	Debtor        uuid.UUID `json:"debtor"`
+	Creditor      uuid.UUID `json:"creditor"`
 }
 
 func (q *Queries) CreateDebt(ctx context.Context, arg CreateDebtParams) (Debt, error) {

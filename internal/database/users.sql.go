@@ -18,9 +18,9 @@ RETURNING
 `
 
 type CreateUserParams struct {
-	Email          string
-	HashedPassword string
-	Name           sql.NullString
+	Email          string         `json:"email"`
+	HashedPassword string         `json:"hashed_password"`
+	Name           sql.NullString `json:"name"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
