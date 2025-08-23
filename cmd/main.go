@@ -60,8 +60,8 @@ func main() {
 	paths[util.FormPath("POST", "/register", basePath)] = apiCfg.HandleRegister
 	paths[util.FormPath("POST", "/token/refresh", basePath)] = apiCfg.HandleRefreshToken
 	paths[util.FormPath("POST", "/groups", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleCreateGroup)
-	paths[util.FormPath("GET", "/groups/{userID}", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleGetGroups) //TODO: user id is now stored in the request context by the auth middleware
-	paths[util.FormPath("POST", "/groups/join/{groupName}", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleJoinGroup)
+	paths[util.FormPath("GET", "/groups", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleGetGroups)
+	paths[util.FormPath("POST", "/groups/join", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleJoinGroup)
 
 	if apiCfg.Platform == "dev" {
 		paths[util.FormPath("GET", "/health", basePath)] = routes.HandleHealth

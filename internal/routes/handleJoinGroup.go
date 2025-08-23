@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/cooperstandard/NetZero/internal/database"
@@ -9,12 +10,18 @@ import (
 )
 
 func (cfg *APIConfig) HandleJoinGroup(w http.ResponseWriter, r *http.Request) {
-	groupName := r.PathValue("groupName")
-	if len(groupName) < 1 {
-		util.RespondWithError(w, 500, "group name not supplied", nil)
+	type parameters struct {
+		GroupName string `json:"group_name"`
+	}
+	decoder := json.NewDecoder(r.Body)
+	params := parameters{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		util.RespondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
+		return
 	}
 
-	group, err := cfg.DB.GetGroupByName(r.Context(), groupName)
+	group, err := cfg.DB.GetGroupByName(r.Context(), params.GroupName)
 	if err != nil {
 		util.RespondWithError(w, 500, "group not found", err)
 		return

@@ -9,9 +9,14 @@ import (
 )
 
 func (cfg *APIConfig) HandleGetGroups(w http.ResponseWriter, r *http.Request) {
-	userID := r.PathValue("userID")
+	userID, ok := r.Context().Value("userID").(uuid.UUID)
+	if !ok {
+		util.RespondWithError(w, 500, "invalid userID", nil)
+		return
+	}
+
 	groups, err := cfg.DB.GetGroupsByUser(r.Context(), uuid.NullUUID{
-		UUID:  uuid.MustParse(userID),
+		UUID:  userID,
 		Valid: true,
 	})
 
