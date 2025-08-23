@@ -63,5 +63,4 @@ func (cfg *APIConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		RefreshToken: refreshToken,
 	}
 	util.RespondWithJSON(w, 200, res)
-
 }

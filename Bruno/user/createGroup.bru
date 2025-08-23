@@ -1,19 +1,18 @@
 meta {
-  name: registerUser
+  name: createGroup
   type: http
-  seq: 4
+  seq: 2
 }
 
 post {
-  url: {{basepath}}/register
+  url: {{basepath}}/groups
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "email": "testEmail",
-    "password": "testPassword"
+    "name": "test group2"
   }
 }
 

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/cooperstandard/NetZero/internal/auth"
@@ -25,11 +26,13 @@ func (cfg *APIConfig) UserAuthMiddleware(next http.HandlerFunc) http.HandlerFunc
 			util.RespondWithError(w, 401, "unable to locate auth Header", err)
 			return
 		}
-		_, err = auth.ValidateJWT(token, cfg.TokenSecret)
+		id, err := auth.ValidateJWT(token, cfg.TokenSecret)
 		if err != nil {
 			util.RespondWithError(w, 401, "unable to decode jwt", err)
 			return
 		}
-		next.ServeHTTP(w, r)
+		ctx := context.WithValue(r.Context(), "userID", id)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }

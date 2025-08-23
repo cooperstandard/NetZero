@@ -24,6 +24,7 @@ func (cfg *APIConfig) HandleCreateGroup(w http.ResponseWriter, r *http.Request) 
 
 	if err != nil {
 		util.RespondWithError(w, http.StatusInternalServerError, "unable to create group", err)
+		return
 	}
 
 	ret := Group{

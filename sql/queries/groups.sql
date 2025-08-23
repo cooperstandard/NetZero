@@ -32,4 +32,5 @@ WHERE
     group_id = $1
     AND id != $2;
 
-
+-- name: GetGroupByName :one
+SELECT * FROM groups WHERE name = $1;
