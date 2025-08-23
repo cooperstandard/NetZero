@@ -29,8 +29,7 @@ FROM
     users
     JOIN group_members ON users.id = group_members.user_id
 WHERE
-    group_id = $1
-    AND id != $2;
+    group_id = $1;
 
 -- name: GetGroupByName :one
 SELECT * FROM groups WHERE name = $1;

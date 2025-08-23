@@ -98,21 +98,15 @@ FROM
     JOIN group_members ON users.id = group_members.user_id
 WHERE
     group_id = $1
-    AND id != $2
 `
-
-type GetUsersByGroupParams struct {
-	GroupID uuid.NullUUID
-	ID      uuid.UUID
-}
 
 type GetUsersByGroupRow struct {
 	ID   uuid.UUID
 	Name sql.NullString
 }
 
-func (q *Queries) GetUsersByGroup(ctx context.Context, arg GetUsersByGroupParams) ([]GetUsersByGroupRow, error) {
-	rows, err := q.db.QueryContext(ctx, getUsersByGroup, arg.GroupID, arg.ID)
+func (q *Queries) GetUsersByGroup(ctx context.Context, groupID uuid.NullUUID) ([]GetUsersByGroupRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUsersByGroup, groupID)
 	if err != nil {
 		return nil, err
 	}
