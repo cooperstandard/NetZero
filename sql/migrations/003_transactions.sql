@@ -6,8 +6,7 @@ CREATE TABLE transactions (
     title text NOT NULL,
     description text,
     author_id uuid NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    group_id uuid NOT NULL REFERENCES GROUPS (id) ON DELETE CASCADE,
-    amount numeric(20, 2) NOT NULL
+    group_id uuid NOT NULL REFERENCES GROUPS (id) ON DELETE CASCADE
 );
 
 -- +goose Down

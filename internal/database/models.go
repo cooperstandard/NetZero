@@ -52,7 +52,6 @@ type Transaction struct {
 	Description sql.NullString `json:"description"`
 	AuthorID    uuid.UUID      `json:"author_id"`
 	GroupID     uuid.UUID      `json:"group_id"`
-	Amount      string         `json:"amount"`
 }
 
 type User struct {

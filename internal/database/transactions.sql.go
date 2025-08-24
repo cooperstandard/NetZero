@@ -13,10 +13,10 @@ import (
 )
 
 const createTransaction = `-- name: CreateTransaction :one
-INSERT INTO transactions (id, created_at, updated_at, title, description, author_id, group_id, amount)
-    VALUES (gen_random_uuid (), NOW(), NOW(), $1, $2, $3, $4, $5)
+INSERT INTO transactions (id, created_at, updated_at, title, description, author_id, group_id)
+    VALUES (gen_random_uuid (), NOW(), NOW(), $1, $2, $3, $4)
 RETURNING
-    id, created_at, updated_at, title, description, author_id, group_id, amount
+    id, created_at, updated_at, title, description, author_id, group_id
 `
 
 type CreateTransactionParams struct {
@@ -24,7 +24,6 @@ type CreateTransactionParams struct {
 	Description sql.NullString `json:"description"`
 	AuthorID    uuid.UUID      `json:"author_id"`
 	GroupID     uuid.UUID      `json:"group_id"`
-	Amount      string         `json:"amount"`
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error) {
@@ -33,7 +32,6 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		arg.Description,
 		arg.AuthorID,
 		arg.GroupID,
-		arg.Amount,
 	)
 	var i Transaction
 	err := row.Scan(
@@ -44,14 +42,13 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		&i.Description,
 		&i.AuthorID,
 		&i.GroupID,
-		&i.Amount,
 	)
 	return i, err
 }
 
 const getTransactionsByGroup = `-- name: GetTransactionsByGroup :many
 SELECT
-    id, created_at, updated_at, title, description, author_id, group_id, amount
+    id, created_at, updated_at, title, description, author_id, group_id
 FROM
     transactions
 WHERE
@@ -75,7 +72,6 @@ func (q *Queries) GetTransactionsByGroup(ctx context.Context, groupID uuid.UUID)
 			&i.Description,
 			&i.AuthorID,
 			&i.GroupID,
-			&i.Amount,
 		); err != nil {
 			return nil, err
 		}
@@ -92,7 +88,7 @@ func (q *Queries) GetTransactionsByGroup(ctx context.Context, groupID uuid.UUID)
 
 const getTransactonsByAuthor = `-- name: GetTransactonsByAuthor :many
 SELECT
-    id, created_at, updated_at, title, description, author_id, group_id, amount
+    id, created_at, updated_at, title, description, author_id, group_id
 FROM
     transactions
 WHERE
@@ -116,7 +112,6 @@ func (q *Queries) GetTransactonsByAuthor(ctx context.Context, authorID uuid.UUID
 			&i.Description,
 			&i.AuthorID,
 			&i.GroupID,
-			&i.Amount,
 		); err != nil {
 			return nil, err
 		}
