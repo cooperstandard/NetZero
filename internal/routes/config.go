@@ -30,3 +30,5 @@ type Group struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	ID        uuid.UUID `json:"id"`
 }
+
+type UserID struct{}

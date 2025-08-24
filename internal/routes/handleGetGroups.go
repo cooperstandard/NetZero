@@ -9,7 +9,7 @@ import (
 )
 
 func (cfg *APIConfig) HandleGetGroups(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value("userID").(uuid.UUID)
+	userID, ok := r.Context().Value(UserID{}).(uuid.UUID)
 	if !ok {
 		util.RespondWithError(w, 500, "invalid userID", nil)
 		return

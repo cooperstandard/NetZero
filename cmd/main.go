@@ -81,3 +81,22 @@ func main() {
 func register(mux *http.ServeMux, pattern string, handler http.HandlerFunc) {
 	mux.HandleFunc(pattern, routes.LogMiddleware(handler))
 }
+
+/* TODO: send refresh token like this, not in json response. Update the refresh endpoint to pull cookie from that cookie
+
+  // Create a new cookie
+		cookie := &http.Cookie{
+			Name:     "my_session_cookie",
+			Value:    "some_secret_session_id",
+			Expires:  time.Now().Add(24 * time.Hour), // Set cookie to expire in 24 hours
+			HttpOnly: true,                           // This is the key for HTTP-only
+			Secure:   true,                           // Recommended for production (only send over HTTPS)
+			SameSite: http.SameSiteLax,               // Recommended for production
+			Path:     "/",                            // Available across the entire domain
+		}
+
+		// Add the cookie to the response
+		http.SetCookie(w, cookie)
+
+		fmt.Fprintf(w, "HTTP-only cookie set!")
+*/

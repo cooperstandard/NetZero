@@ -32,7 +32,8 @@ func (cfg *APIConfig) UserAuthMiddleware(next http.HandlerFunc) http.HandlerFunc
 			util.RespondWithError(w, 401, "unable to decode jwt", err)
 			return
 		}
-		ctx := context.WithValue(r.Context(), "userID", id)
+
+		ctx := context.WithValue(r.Context(), UserID{}, id)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}

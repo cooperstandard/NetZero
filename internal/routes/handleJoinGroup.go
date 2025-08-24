@@ -27,7 +27,7 @@ func (cfg *APIConfig) HandleJoinGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, ok := r.Context().Value("userID").(uuid.UUID)
+	userID, ok := r.Context().Value(UserID{}).(uuid.UUID)
 	if !ok {
 		util.RespondWithError(w, 500, "invalid userID", nil)
 		return
