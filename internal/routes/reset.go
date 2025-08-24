@@ -6,7 +6,6 @@ import (
 	"github.com/cooperstandard/NetZero/internal/util"
 )
 
-// TODO: this should only be available in dev
 func (cfg *APIConfig) HandleReset(w http.ResponseWriter, r *http.Request) {
 	err := cfg.DB.RemoveAllUsers(r.Context())
 
