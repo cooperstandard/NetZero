@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/cooperstandard/NetZero/internal/auth"
@@ -35,4 +36,12 @@ func (cfg *APIConfig) UserAuthMiddleware(next http.HandlerFunc) http.HandlerFunc
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
+}
+
+func LogMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.URL.String())
+		next.ServeHTTP(w, r)
+	}
+
 }

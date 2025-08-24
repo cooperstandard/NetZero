@@ -43,12 +43,6 @@ func main() {
 
 	apiMux := http.NewServeMux()
 
-	// TODO: eventually, dynamically create a slice of routes on startup based on env.platform and then register with a for each
-	// type route struct {
-	// 	pattern string
-	// 	handler http.HandlerFunc
-	// }
-
 	paths := make(map[string]http.HandlerFunc)
 
 	// add routes
@@ -85,5 +79,5 @@ func main() {
 }
 
 func register(mux *http.ServeMux, pattern string, handler http.HandlerFunc) {
-	mux.HandleFunc(pattern, handler)
+	mux.HandleFunc(pattern, routes.LogMiddleware(handler))
 }

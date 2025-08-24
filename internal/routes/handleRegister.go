@@ -34,7 +34,7 @@ func (cfg *APIConfig) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	userDetails := database.CreateUserParams{
 		Email:          params.Email,
 		HashedPassword: hash,
-		Name: sql.NullString{String: params.Name, Valid: true},
+		Name:           sql.NullString{String: params.Name, Valid: true},
 	}
 
 	user, err := cfg.DB.CreateUser(r.Context(), userDetails)
