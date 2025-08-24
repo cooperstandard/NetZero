@@ -24,6 +24,7 @@ func (cfg *APIConfig) HandleGetUsers(w http.ResponseWriter, r *http.Request) {
 			CreatedAt: v.CreatedAt,
 			UpdatedAt: v.UpdatedAt,
 			Email:     v.Email,
+			Name:      v.Name.String,
 		})
 	}
 

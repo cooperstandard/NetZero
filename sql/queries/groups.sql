@@ -24,7 +24,8 @@ WHERE
 -- name: GetUsersByGroup :many
 SELECT
     id,
-    name
+    name,
+    email
 FROM
     users
     JOIN group_members ON users.id = group_members.user_id
@@ -33,3 +34,9 @@ WHERE
 
 -- name: GetGroupByName :one
 SELECT * FROM groups WHERE name = $1;
+
+-- name: GetGroups :many
+SELECT * FROM groups;
+
+-- name: RemoveAllGroups :exec
+DELETE FROM groups;

@@ -43,3 +43,13 @@ func (cfg *APIConfig) HandleGetGroups(w http.ResponseWriter, r *http.Request) {
 
 	util.RespondWithJSON(w, 200, resp)
 }
+
+func (cfg *APIConfig) HandleGetAllGroups(w http.ResponseWriter, r *http.Request) {
+	groups, err := cfg.DB.GetGroups(r.Context())
+	if err != nil {
+		util.RespondWithError(w, 500, "unable to get group", err)
+		return
+	}
+
+	util.RespondWithJSON(w, 200, groups)
+}

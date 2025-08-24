@@ -3,26 +3,34 @@ package routes
 import (
 	"net/http"
 
-	"github.com/cooperstandard/NetZero/internal/database"
 	"github.com/cooperstandard/NetZero/internal/util"
 	"github.com/google/uuid"
 )
 
 func (cfg *APIConfig) HandleGetMembers(w http.ResponseWriter, r *http.Request) {
-	groupID, ok := r.Context().Value("groupID").(uuid.UUID)
-	if !ok {
-		util.RespondWithError(w, 500, "invalid userID", nil)
+	groupID, err := uuid.Parse(r.PathValue("groupID"))
+	if err != nil {
+		util.RespondWithError(w, 500, "invalid group id provided", err)
 		return
 	}
-	users, err := cfg.DB.GetUsersByGroup(r.Context(), database.GetUsersByGroupParams{
-		GroupID: uuid.NullUUID{
-			UUID:  groupID,
-			Valid: true,
-		},
-	})
+
+	members, err := cfg.DB.GetUsersByGroup(r.Context(), uuid.NullUUID{UUID: groupID, Valid: true})
 
 	if err != nil {
+		util.RespondWithError(w, 500, "couldn't get group members", err)
 		return
 	}
+
+	var users []User
+
+	for _, member := range members {
+		users = append(users, User{
+			ID:    member.ID,
+			Email: member.Email,
+			Name:  member.Name.String,
+		})
+	}
+
+	util.RespondWithJSON(w, 200, users)
 
 }

@@ -48,6 +48,38 @@ func (q *Queries) GetGroupByName(ctx context.Context, name string) (Group, error
 	return i, err
 }
 
+const getGroups = `-- name: GetGroups :many
+SELECT id, created_at, updated_at, name FROM groups
+`
+
+func (q *Queries) GetGroups(ctx context.Context) ([]Group, error) {
+	rows, err := q.db.QueryContext(ctx, getGroups)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Group
+	for rows.Next() {
+		var i Group
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Name,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getGroupsByUser = `-- name: GetGroupsByUser :many
 SELECT
     id,
@@ -147,4 +179,13 @@ func (q *Queries) JoinGroup(ctx context.Context, arg JoinGroupParams) (GroupMemb
 	var i GroupMember
 	err := row.Scan(&i.UserID, &i.GroupID)
 	return i, err
+}
+
+const removeAllGroups = `-- name: RemoveAllGroups :exec
+DELETE FROM groups
+`
+
+func (q *Queries) RemoveAllGroups(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, removeAllGroups)
+	return err
 }

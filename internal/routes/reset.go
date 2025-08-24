@@ -14,5 +14,13 @@ func (cfg *APIConfig) HandleReset(w http.ResponseWriter, r *http.Request) {
 		util.RespondWithError(w, 500, "failed to remove all users", err)
 		return
 	}
+
+	err = cfg.DB.RemoveAllGroups(r.Context())
+
+	if err != nil {
+		util.RespondWithError(w, 500, "failed to remove all groups", err)
+		return
+	}
+
 	w.WriteHeader(204)
 }

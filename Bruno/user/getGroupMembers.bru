@@ -1,0 +1,19 @@
+meta {
+  name: getGroupMembers
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{basepath}}/groups/members/:groupID
+  body: none
+  auth: none
+}
+
+params:path {
+  groupID: 3bb356b9-842d-41ab-a668-4dd8e1c664ce
+}
+
+settings {
+  encodeUrl: true
+}
