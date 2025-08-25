@@ -46,10 +46,8 @@ func main() {
 	paths := make(map[string]http.HandlerFunc)
 
 	// add routes
-	paths[util.FormPath("POST", "/admin/reset", basePath)] = apiCfg.AdminAuthMiddleware(apiCfg.HandleReset)
 	paths[util.FormPath("GET", "/admin/users", basePath)] = apiCfg.AdminAuthMiddleware(apiCfg.HandleGetUsers)
-	// paths[util.FormPath("GET", "/admin/users", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleGetUsers)
-	// TODO: add a health endpoint for testing auth and server liveness.
+	paths[util.FormPath("GET", "/health", basePath)] = routes.HandleHealth
 	paths[util.FormPath("POST", "/login", basePath)] = apiCfg.HandleLogin
 	paths[util.FormPath("POST", "/register", basePath)] = apiCfg.HandleRegister
 	paths[util.FormPath("POST", "/token/refresh", basePath)] = apiCfg.HandleRefreshToken
@@ -60,13 +58,12 @@ func main() {
 	paths[util.FormPath("GET", "/groups/members/{groupID}", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleGetMembers)
 
 	if apiCfg.Platform == "dev" {
-		paths[util.FormPath("GET", "/health", basePath)] = routes.HandleHealth
+		paths[util.FormPath("POST", "/admin/reset", basePath)] = apiCfg.AdminAuthMiddleware(apiCfg.HandleReset)
 	}
 
 	// register routes
 	for k, v := range paths {
 		register(apiMux, k, v)
-
 	}
 
 	srv := &http.Server{

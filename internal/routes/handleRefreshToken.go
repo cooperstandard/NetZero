@@ -9,13 +9,12 @@ import (
 )
 
 func (cfg *APIConfig) HandleRefreshToken(w http.ResponseWriter, r *http.Request) {
-	token, err := auth.GetBearerToken(r.Header)
+	refreshCookie, err := r.Cookie("refresh")
 	if err != nil {
-		util.RespondWithError(w, 401, "Unauthorized", err)
-		return
+		util.RespondWithError(w, 400, "unknown error occured", err)
 	}
 
-	refreshToken, err := cfg.DB.GetToken(r.Context(), token)
+	refreshToken, err := cfg.DB.GetToken(r.Context(), refreshCookie.Value)
 	if err != nil {
 		util.RespondWithError(w, 401, "unable to retrieve refresh token record", err)
 		return
