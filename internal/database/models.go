@@ -11,6 +11,14 @@ import (
 	"github.com/google/uuid"
 )
 
+type Balance struct {
+	UserID     uuid.NullUUID `json:"user_id"`
+	GroupID    uuid.NullUUID `json:"group_id"`
+	CreditorID uuid.NullUUID `json:"creditor_id"`
+	UpdatedAt  time.Time     `json:"updated_at"`
+	Balance    string        `json:"balance"`
+}
+
 type Debt struct {
 	ID            uuid.UUID `json:"id"`
 	Amount        string    `json:"amount"`

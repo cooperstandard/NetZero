@@ -3,7 +3,7 @@ CREATE TABLE balances (
   user_id UUID,
   group_id UUID,
   creditor_id UUID,
-  created_at timestamp NOT NULL,
+  updated_at timestamp NOT NULL,
   balance numeric(20, 2) NOT NULL,
   UNIQUE(user_id, group_id, creditor_id)
 );
