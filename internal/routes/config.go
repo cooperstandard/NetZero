@@ -1,3 +1,4 @@
+//  Package routes functions and utilities for serving netzero 
 package routes
 
 import (

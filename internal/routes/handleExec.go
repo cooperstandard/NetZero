@@ -23,3 +23,7 @@ func (cfg *APIConfig) HandleReset(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(204)
 }
+
+func HandleHealth(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(204)
+}
