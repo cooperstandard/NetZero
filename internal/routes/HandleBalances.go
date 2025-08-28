@@ -11,7 +11,7 @@ import (
 
 func (cfg *APIConfig) HandleGetBalance(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		groupID string `json:"group_id"`
+		GroupID string `json:"group_id"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -23,7 +23,7 @@ func (cfg *APIConfig) HandleGetBalance(w http.ResponseWriter, r *http.Request) {
 	}
 
 	balances, err := cfg.DB.GetBalanceForUserByGroup(r.Context(), database.GetBalanceForUserByGroupParams{
-		GroupID: uuid.NullUUID{Valid: true, UUID: uuid.MustParse(params.groupID)},
+		GroupID: uuid.NullUUID{Valid: true, UUID: uuid.MustParse(params.GroupID)},
 		UserID:  uuid.NullUUID{Valid: true, UUID: r.Context().Value(UserID{}).(uuid.UUID)},
 	})
 
