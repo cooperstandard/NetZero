@@ -1,12 +1,17 @@
 package util
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"strconv"
+	"strings"
+)
 
 //TODO: add and subtract, convert from numeric string to dollars and Cents
 
 type Numeric struct {
-	Dollars int64
-	Cents int
+	Dollars int
+	Cents   int
 }
 
 func ValidateAndFormNumericString(val Numeric) (string, error) {
@@ -22,9 +27,25 @@ func ValidateAndFormNumericString(val Numeric) (string, error) {
 }
 
 func StringToNumeric(s string) (Numeric, error) {
+	parts := strings.Split(s, ".")
+	dollars, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return Numeric{}, errors.New("invalid dollar portion of the numeric string")
+	}
 
+	cents, err := strconv.Atoi(parts[1])
 
-	return Numeric{}, nil
+	if err != nil {
+		return Numeric{}, errors.New("invalid cents portion of the numeric string")
+	}
+
+	return Numeric{Dollars: dollars, Cents: cents}, nil
 }
 
+func NumericAddition(a, b Numeric) Numeric {
+	return Numeric{}
+}
 
+func NumericSubtraction(a, b Numeric) Numeric {
+	return Numeric{}
+}

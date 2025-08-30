@@ -10,7 +10,7 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 			Amount   struct {
 				Dollars int `json:"dollars"`
 				Cents   int `json:"cents"`
-			} `json:"amount"` //TODO: not sure if this is how amount should be modelled.
+			} `json:"amount"`
 		} `json:"transactions"`
 		GroupID string `json:"group_id"`
 	}
