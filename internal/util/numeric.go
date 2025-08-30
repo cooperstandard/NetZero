@@ -14,12 +14,12 @@ type Numeric struct {
 	Cents   uint
 }
 
-func ValidateAndFormNumericString(val Numeric) (string, error) {
-	if val.Cents > 99 {
-		return "", fmt.Errorf("%d is not a valid value for cents, cents should be positive and less than 100", val.Cents)
+func (a Numeric) ValidateAndFormNumericString() (string, error) {
+	if a.Cents > 99 {
+		return "", fmt.Errorf("%d is not a valid value for cents, cents should be positive and less than 100", a.Cents)
 	}
 	
-	return fmt.Sprintf("%20d.%d", val.Dollars, val.Cents), nil
+	return fmt.Sprintf("%20d.%d", a.Dollars, a.Cents), nil
 }
 
 func StringToNumeric(s string) (Numeric, error) {
@@ -44,8 +44,8 @@ func TestNumeric(n Numeric) bool {
 }
 
 
-// NumericAddition sum, ok
-func NumericAddition(a, b Numeric) (Numeric, bool) {
+// Addition sum, ok
+func (a Numeric) Addition(b Numeric) (Numeric, bool) {
 	if !TestNumeric(a) || !TestNumeric(b) {
 		return Numeric{}, false
 	}
@@ -59,8 +59,8 @@ func NumericAddition(a, b Numeric) (Numeric, bool) {
 	return Numeric{Dollars: dollars, Cents: cents}, true
 }
 
-// NumericSubtraction returns result (of a - b), ok
-func NumericSubtraction(a, b Numeric) (Numeric, bool) {
+// Subtraction returns result (of a - b), ok
+func (a Numeric) Subtraction(b Numeric) (Numeric, bool) {
 	if !TestNumeric(a) || !TestNumeric(b) {
 		return Numeric{}, false
 	}
