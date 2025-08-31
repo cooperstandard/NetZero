@@ -1,4 +1,4 @@
-//Package util - utilities useful for serving NetZero
+// Package util - utilities useful for serving NetZero
 package util
 
 import (
@@ -19,7 +19,7 @@ func (a Numeric) ValidateAndFormNumericString() (string, error) {
 	if a.Cents > 99 {
 		return "", fmt.Errorf("%d is not a valid value for cents, cents should be positive and less than 100", a.Cents)
 	}
-	
+
 	return fmt.Sprintf("%20d.%d", a.Dollars, a.Cents), nil
 }
 
@@ -44,7 +44,6 @@ func TestNumeric(n Numeric) bool {
 	return n.Cents <= 99
 }
 
-
 // Addition sum, ok
 func (a Numeric) Addition(b Numeric) (Numeric, bool) {
 	if !TestNumeric(a) || !TestNumeric(b) {
@@ -65,19 +64,19 @@ func (a Numeric) Subtraction(b Numeric) (Numeric, bool) {
 	if !TestNumeric(a) || !TestNumeric(b) {
 		return Numeric{}, false
 	}
-	
+
 	if a.Cents >= b.Cents && a.Dollars >= b.Dollars {
 		cents := a.Cents - b.Cents
 		dollars := a.Dollars - b.Dollars
 		return Numeric{Dollars: dollars, Cents: cents}, true
 	}
-	
+
 	if a.Dollars > b.Dollars {
 		dollars := (a.Dollars - b.Dollars) - 1
-		cents := (a.Cents + 100) - b.Cents 
+		cents := (a.Cents + 100) - b.Cents
 		return Numeric{Dollars: dollars, Cents: cents}, true
 	}
-	
+
 	if a.Dollars < b.Dollars {
 		return Numeric{}, false
 	}
