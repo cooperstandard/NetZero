@@ -1,3 +1,4 @@
+//Package util - utilities useful for serving NetZero
 package util
 
 import (
