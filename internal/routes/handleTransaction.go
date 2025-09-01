@@ -1,6 +1,8 @@
 package routes
 
-import "net/http"
+import (
+	"net/http"
+)
 
 func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
@@ -14,5 +16,4 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 		} `json:"transactions"`
 		GroupID string `json:"group_id"`
 	}
-
 }
