@@ -5,3 +5,4 @@
 * pay debt / settle up
 * leave group
 * bruno for balances and transactions
+* add limit to group size
