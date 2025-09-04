@@ -50,7 +50,7 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 	}
 
 	debts := []database.Debt{}
-	for _, v := range params.Transactions { //TODO: this should use go routines
+	for _, v := range params.Transactions { //TODO: this should use go routines and collect a slice of errors to send back with the successful transactions
 
 		debt, _ := cfg.DB.CreateDebt(r.Context(), database.CreateDebtParams{
 			Amount:        "",
