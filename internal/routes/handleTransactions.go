@@ -1,9 +1,9 @@
 package routes
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/cooperstandard/NetZero/internal/database"
@@ -14,15 +14,15 @@ import (
 func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Transactions []struct {
-			Debtor   string `json:"debtor"`
-			Amount   struct {
+			Debtor string `json:"debtor"`
+			Amount struct {
 				Dollars int `json:"dollars"`
 				Cents   int `json:"cents"`
 			} `json:"amount"`
 		} `json:"transactions"`
 		Creditor string `json:"creditor"`
-		GroupID string `json:"group_id"`
-		Title   string `json:"title"`
+		GroupID  string `json:"group_id"`
+		Title    string `json:"title"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -33,10 +33,11 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if len(params.Transactions) > 50 || len(params.Transactions) == 0 {
-		util.RespondWithError(w, 400, "please batch transactions into groups of 50 or fewer to prevent service slow downs", fmt.Errorf("invalid number of transactions: %d", len(params.Transactions)))
-		return
-	}
+	// TODO: this
+	// if len(params.Transactions) > 50 || len(params.Transactions) == 0 {
+	// 	util.RespondWithError(w, 400, "please batch transactions into groups of 50 or fewer to prevent service slow downs", fmt.Errorf("invalid number of transactions: %d", len(params.Transactions)))
+	// 	return
+	// }
 
 	transaction, err := cfg.DB.CreateTransaction(r.Context(), database.CreateTransactionParams{
 		Title:       params.Title,
@@ -44,23 +45,23 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 		AuthorID:    uuid.MustParse(params.Creditor),
 		GroupID:     uuid.MustParse(params.GroupID),
 	})
-	
+
 	if err != nil {
 		util.RespondWithError(w, 500, "unable to create transaction record", err)
 	}
 
-	debts := []database.Debt{}
 	for _, v := range params.Transactions { //TODO: this should use go routines and collect a slice of errors to send back with the successful transactions
-
-		debt, _ := cfg.DB.CreateDebt(r.Context(), database.CreateDebtParams{
+		go recordDebt(*cfg, r.Context(), database.CreateDebtParams{
 			Amount:        "",
 			TransactionID: transaction.ID,
 			Debtor:        uuid.MustParse(v.Debtor),
 			Creditor:      uuid.MustParse(params.Creditor),
 		})
-		debts = append(debts, debt)
 	}
 
-	util.RespondWithJSON(w, 200, debts)
+	w.WriteHeader(204)
+}
 
+func recordDebt(cfg APIConfig, ctx context.Context, debt database.CreateDebtParams) {
+	cfg.DB.CreateDebt(ctx, debt)
 }
