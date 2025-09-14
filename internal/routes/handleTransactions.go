@@ -74,7 +74,7 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 	}
 
 	if len(failed) > 0 {
-		util.RespondWithJSON(w, 418, struct {
+		util.RespondWithJSON(w, 206, struct {
 			FailedTransactions []database.CreateDebtParams `json:"failed_transactions"`
 			TransactionID      uuid.UUID                   `json:"transaction_id"`
 		}{failed, transaction.ID})
