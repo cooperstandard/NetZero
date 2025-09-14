@@ -34,6 +34,8 @@ func main() {
 	}
 	dbQueries := database.New(dbConn)
 
+	log.Println("connected to DB starting server")
+
 	apiCfg := routes.APIConfig{
 		DB:          dbQueries,
 		Platform:    platform,
