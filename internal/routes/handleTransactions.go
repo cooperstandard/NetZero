@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/cooperstandard/NetZero/internal/database"
@@ -33,7 +34,7 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	// TODO: this
+	// TODO: this, need a way to add new debts to an existing transaction and limit the number of transactions which may be added in any one call to prevent locking up the database and web server
 	// if len(params.Transactions) > 50 || len(params.Transactions) == 0 {
 	// 	util.RespondWithError(w, 400, "please batch transactions into groups of 50 or fewer to prevent service slow downs", fmt.Errorf("invalid number of transactions: %d", len(params.Transactions)))
 	// 	return
@@ -45,23 +46,49 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 		AuthorID:    uuid.MustParse(params.Creditor),
 		GroupID:     uuid.MustParse(params.GroupID),
 	})
-
 	if err != nil {
 		util.RespondWithError(w, 500, "unable to create transaction record", err)
 	}
 
-	for _, v := range params.Transactions { //TODO: this should use go routines and collect a slice of errors to send back with the successful transactions
+	okChan := make(chan bool)
+	failedChan := make(chan database.CreateDebtParams)
+	var failed []database.CreateDebtParams
+
+	for _, v := range params.Transactions {
 		go recordDebt(*cfg, r.Context(), database.CreateDebtParams{
-			Amount:        "",
+			Amount:        fmt.Sprintf("%d.%d", v.Amount.Dollars, v.Amount.Cents), // TODO: validate the Amount
 			TransactionID: transaction.ID,
 			Debtor:        uuid.MustParse(v.Debtor),
 			Creditor:      uuid.MustParse(params.Creditor),
-		})
+		}, okChan, failedChan)
 	}
 
-	w.WriteHeader(204)
+	for range len(params.Transactions) {
+		select {
+		case <-okChan:
+			continue
+		case fail := <-failedChan:
+			failed = append(failed, fail)
+			continue
+		}
+	}
+
+	if len(failed) > 0 {
+		util.RespondWithJSON(w, 418, struct {
+			FailedTransactions []database.CreateDebtParams `json:"failed_transactions"`
+			TransactionID      uuid.UUID                   `json:"transaction_id"`
+		}{failed, transaction.ID})
+		return
+	}
+
+	util.RespondWithJSON(w, 200, struct {
+		TransactionID uuid.UUID `json:"transaction_id"`
+	}{transaction.ID})
 }
 
-func recordDebt(cfg APIConfig, ctx context.Context, debt database.CreateDebtParams) {
-	cfg.DB.CreateDebt(ctx, debt)
+func recordDebt(cfg APIConfig, ctx context.Context, debt database.CreateDebtParams, okChan chan bool, failedChan chan database.CreateDebtParams) {
+	_, err := cfg.DB.CreateDebt(ctx, debt)
+	if err != nil {
+		failedChan <- debt
+	}
 }
