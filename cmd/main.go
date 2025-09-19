@@ -45,6 +45,9 @@ func main() {
 	if err := goose.Up(dbConn, migrationsDir); err != nil {
 		log.Fatalf("goose: failed to apply migrations: %v\n", err)
 	}
+	if err := goose.Version(dbConn, migrationsDir); err != nil {
+		log.Fatalf("unable to get version")
+	}
 
 	log.Println("connected to DB starting server")
 

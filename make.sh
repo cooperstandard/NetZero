@@ -9,13 +9,18 @@ case "$1" in
   build)
     docker build -t netzero .
     ;;
+  # run-docker)
+  #   docker stop netzero-local
+  #   docker rm netzero-local
+  #   docker run -p 8080:8080 --name netzero-local netzero
+  #   ;;
+  # stop-docker)
+  # docker stop 
   run-docker)
-    docker stop netzero-local
-    docker rm netzero-local
-    docker run -p 8080:8080 --name netzero-local netzero
+    docker-compose down
+    docker-compose up
+    docker-compose down
     ;;
-  stop-docker)
-  docker stop 
 
 
 esac
