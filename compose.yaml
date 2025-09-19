@@ -1,0 +1,22 @@
+services:
+  netzero:
+    build: .
+    restart: always
+    ports:
+      - 8080:8080
+      - 8081:8081
+
+  postgres:
+    image: postgres # Or a specific version like postgres:14.1-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: netzero
+    # ports:
+      # - "5432:5432" # Maps host port 5432 to container port 5432
+    volumes:
+      - db_data:/var/lib/postgresql/data # Persists data even if container is removed
+
+volumes:
+  db_data:

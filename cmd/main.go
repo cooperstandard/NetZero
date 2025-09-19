@@ -10,8 +10,11 @@ import (
 	"github.com/cooperstandard/NetZero/internal/routes"
 	"github.com/cooperstandard/NetZero/internal/util"
 	"github.com/joho/godotenv"
+	"github.com/pressly/goose/v3"
 	_ "github.com/lib/pq"
 )
+ 
+const migrationsDir = "./sql/migrations"
 
 func main() {
 	const port = "8080"
@@ -32,7 +35,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error opening database: %s", err)
 	}
+	defer dbConn.Close()
 	dbQueries := database.New(dbConn)
+
+	if err := goose.SetDialect("postgres"); err != nil {
+		log.Fatalf("goose: failed to set dialect: %v\n", err)
+	}
+
+	if err := goose.Up(dbConn, migrationsDir); err != nil {
+		log.Fatalf("goose: failed to apply migrations: %v\n", err)
+	}
 
 	log.Println("connected to DB starting server")
 
