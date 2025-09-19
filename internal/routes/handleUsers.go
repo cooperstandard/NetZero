@@ -48,7 +48,10 @@ func (cfg *APIConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	refreshToken, _ := auth.MakeRefreshToken()
+	refreshToken, err := auth.MakeRefreshToken()
+	if err != nil {
+		util.RespondWithError(w, 500, "unable to form refresh token", err)
+	}
 	cfg.DB.CreateToken(r.Context(), database.CreateTokenParams{
 		Token:     refreshToken,
 		Email:     user.Email,
@@ -56,14 +59,19 @@ func (cfg *APIConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		ExpiresAt: time.Now().Add(60 * 24 * time.Hour),
 	})
 
+
+
 	res := User{
 		ID:           user.ID,
 		CreatedAt:    user.CreatedAt,
 		UpdatedAt:    user.UpdatedAt,
 		Email:        user.Email,
 		Token:        jwt,
-		RefreshToken: refreshToken,
+		RefreshToken: refreshToken, //TODO: only send this in the cookies and change the config to be http only and same site
 	}
+	
+	w.Header().Add("Set-Cookie", fmt.Sprintf("refresh=%s;", refreshToken))
+
 	util.RespondWithJSON(w, 200, res)
 }
 
@@ -136,7 +144,8 @@ func (cfg *APIConfig) HandleGetUsers(w http.ResponseWriter, r *http.Request) {
 func (cfg *APIConfig) HandleRefreshToken(w http.ResponseWriter, r *http.Request) {
 	refreshCookie, err := r.Cookie("refresh")
 	if err != nil {
-		util.RespondWithError(w, 400, "unknown error occured", err)
+		util.RespondWithError(w, 400, "cookie not present in request", err)
+		return
 	}
 
 	refreshToken, err := cfg.DB.GetToken(r.Context(), refreshCookie.Value)
