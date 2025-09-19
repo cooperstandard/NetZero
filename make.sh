@@ -18,7 +18,12 @@ case "$1" in
   # docker stop 
   run-docker)
     docker-compose down
-    docker-compose up
+    docker-compose up --build
+    docker-compose down
+    ;;
+  run-docker-detached)
+    docker-compose down
+    docker-compose up --build -d
     docker-compose down
     ;;
 
