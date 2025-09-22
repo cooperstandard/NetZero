@@ -102,6 +102,36 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 		TransactionID          uuid.UUID                   `json:"transaction_id"`
 		SuccessfulTransactions []database.Debt             `json:"successful_transactions,omitempty"`
 	}{failed, transactionID, succeeded})
-
 }
 
+func (cfg *APIConfig) HandleGetTransactions(w http.ResponseWriter, r *http.Request) {
+	// expected to be either group_id= or author_id=, if neither is present assume getting transactions for the current user account
+	groupID := r.URL.Query().Get("group_id")
+
+	if groupID != "" {
+		transactions, err := cfg.DB.GetTransactonsByAuthor(r.Context(), uuid.MustParse(groupID))
+		if err != nil {
+			util.RespondWithError(w, 404, "unable to locate records", err)
+			return
+		}
+		util.RespondWithJSON(w, 200, transactions)
+		return
+	}
+
+	authorID := r.URL.Query().Get("author_id")
+	if authorID == "" {
+		authorID = r.Context().Value(UserID{}).(uuid.UUID).String()
+	}
+
+	transactions, err := cfg.DB.GetTransactonsByAuthor(r.Context(), uuid.MustParse(authorID))
+
+	if err != nil {
+		util.RespondWithError(w, 404, "unable to locate records", err)
+		return
+	}
+	util.RespondWithJSON(w, 200, transactions)
+}
+
+func (cfg *APIConfig) HandleGetTransactionDetails(w http.ResponseWriter, r *http.Request) {
+	//TODO: takes in a list from the query params and returns debts for those transaction ids
+}
