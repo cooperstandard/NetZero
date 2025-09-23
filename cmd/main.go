@@ -10,10 +10,10 @@ import (
 	"github.com/cooperstandard/NetZero/internal/routes"
 	"github.com/cooperstandard/NetZero/internal/util"
 	"github.com/joho/godotenv"
-	"github.com/pressly/goose/v3"
 	_ "github.com/lib/pq"
+	"github.com/pressly/goose/v3"
 )
- 
+
 const migrationsDir = "./sql/migrations"
 
 func main() {

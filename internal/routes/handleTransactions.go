@@ -105,7 +105,7 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 }
 
 func (cfg *APIConfig) HandleGetTransactions(w http.ResponseWriter, r *http.Request) {
-	// expected to be either group_id= or author_id=, if neither is present assume getting transactions for the current user account
+	//NOTE: expected to be either group_id= or author_id=, if neither is present assume getting transactions for the current user account
 	groupID := r.URL.Query().Get("group_id")
 
 	if groupID != "" {
@@ -124,7 +124,6 @@ func (cfg *APIConfig) HandleGetTransactions(w http.ResponseWriter, r *http.Reque
 	}
 
 	transactions, err := cfg.DB.GetTransactonsByAuthor(r.Context(), uuid.MustParse(authorID))
-
 	if err != nil {
 		util.RespondWithError(w, 404, "unable to locate records", err)
 		return
@@ -133,5 +132,32 @@ func (cfg *APIConfig) HandleGetTransactions(w http.ResponseWriter, r *http.Reque
 }
 
 func (cfg *APIConfig) HandleGetTransactionDetails(w http.ResponseWriter, r *http.Request) {
-	//TODO: takes in a list from the query params and returns debts for those transaction ids
+	//NOTE: takes in a list from the query params and returns debts for those transaction ids
+	// in the form of ?transactions=<transaction1id>,<transaction2id>,...,<transactionnid>
+	transactions := r.URL.Query()["transactions"]
+	if len(transactions) == 0 {
+		w.WriteHeader(204)
+		return
+	}
+
+	if len(transactions) > 100 {
+		util.RespondWithError(w, 400, "please batch get transaction details requests into groups of size 100 or fewer", nil)
+		return
+	}
+
+	transactionDetails := make(map[string][]database.Debt)
+
+	for _, transaction := range transactions {
+		transactionID := uuid.MustParse(transaction)
+		debts, err := cfg.DB.GetDebtsByTransaction(r.Context(), transactionID)
+		if err != nil {
+			util.RespondWithError(w, 500, "unable to retrieve records for transaction: "+transaction, err)
+			return
+		}
+
+		transactionDetails[transaction] = debts
+
+	}
+
+	util.RespondWithJSON(w, 200, transactionDetails)
 }

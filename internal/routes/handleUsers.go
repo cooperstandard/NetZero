@@ -59,8 +59,6 @@ func (cfg *APIConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		ExpiresAt: time.Now().Add(60 * 24 * time.Hour),
 	})
 
-
-
 	res := User{
 		ID:           user.ID,
 		CreatedAt:    user.CreatedAt,
@@ -69,7 +67,7 @@ func (cfg *APIConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		Token:        jwt,
 		RefreshToken: refreshToken, //TODO: only send this in the cookies and change the config to be http only and same site
 	}
-	
+
 	w.Header().Add("Set-Cookie", fmt.Sprintf("refresh=%s;", refreshToken))
 
 	util.RespondWithJSON(w, 200, res)
