@@ -73,6 +73,9 @@ func main() {
 	paths[util.FormPath("GET", "/groups/all", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleGetAllGroups)
 	paths[util.FormPath("POST", "/groups/join", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleJoinGroup)
 	paths[util.FormPath("GET", "/groups/members/{groupID}", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleGetMembers)
+	paths[util.FormPath("POST", "/transaction", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleCreateTransactions)
+	paths[util.FormPath("GET", "/transactions", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleGetTransactions)
+	paths[util.FormPath("GET", "/transactions/details", basePath)] = apiCfg.UserAuthMiddleware(apiCfg.HandleGetTransactionDetails)
 
 	if apiCfg.Platform == "dev" {
 		paths[util.FormPath("POST", "/admin/reset", basePath)] = apiCfg.AdminAuthMiddleware(apiCfg.HandleReset)

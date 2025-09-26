@@ -10,6 +10,7 @@ import (
 )
 
 func (cfg *APIConfig) HandleGetBalance(w http.ResponseWriter, r *http.Request) {
+	//TODO: fix this
 	type parameters struct {
 		GroupID string `json:"group_id"`
 	}
