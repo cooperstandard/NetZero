@@ -8,3 +8,6 @@
 * patch user (and the other entities which may need patching)
 * bruno for balances and transactions
 * add limit to group size
+* github action to build and publish to dockerhub
+* rethink transaction flow
+
