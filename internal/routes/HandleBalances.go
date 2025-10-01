@@ -23,7 +23,7 @@ func (cfg *APIConfig) HandleGetBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	balances, err := cfg.DB.GetBalanceForUserByGroup(r.Context(), database.GetBalanceForUserByGroupParams{
+	balances, err := cfg.DB.GetBalanceForDebtorByGroup(r.Context(), database.GetBalanceForDebtorByGroupParams{
 		GroupID: uuid.NullUUID{Valid: true, UUID: uuid.MustParse(params.GroupID)},
 		UserID:  uuid.NullUUID{Valid: true, UUID: r.Context().Value(UserID{}).(uuid.UUID)},
 	})

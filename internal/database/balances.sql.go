@@ -44,33 +44,33 @@ func (q *Queries) CreateBalance(ctx context.Context, arg CreateBalanceParams) (B
 	return i, err
 }
 
-const getBalanceForUserByGroup = `-- name: GetBalanceForUserByGroup :many
+const getBalanceForCreditorByGroup = `-- name: GetBalanceForCreditorByGroup :many
 SELECT balances.updated_at, balances.balance, users.name, users.email
   FROM balances JOIN users ON users.id = creditor.id
-WHERE balances.group_id = $1 and user_id = $2
+WHERE balances.group_id = $1 and creditor_id = $2
 `
 
-type GetBalanceForUserByGroupParams struct {
-	GroupID uuid.NullUUID `json:"group_id"`
-	UserID  uuid.NullUUID `json:"user_id"`
+type GetBalanceForCreditorByGroupParams struct {
+	GroupID    uuid.NullUUID `json:"group_id"`
+	CreditorID uuid.NullUUID `json:"creditor_id"`
 }
 
-type GetBalanceForUserByGroupRow struct {
+type GetBalanceForCreditorByGroupRow struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	Balance   string         `json:"balance"`
 	Name      sql.NullString `json:"name"`
 	Email     string         `json:"email"`
 }
 
-func (q *Queries) GetBalanceForUserByGroup(ctx context.Context, arg GetBalanceForUserByGroupParams) ([]GetBalanceForUserByGroupRow, error) {
-	rows, err := q.db.QueryContext(ctx, getBalanceForUserByGroup, arg.GroupID, arg.UserID)
+func (q *Queries) GetBalanceForCreditorByGroup(ctx context.Context, arg GetBalanceForCreditorByGroupParams) ([]GetBalanceForCreditorByGroupRow, error) {
+	rows, err := q.db.QueryContext(ctx, getBalanceForCreditorByGroup, arg.GroupID, arg.CreditorID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetBalanceForUserByGroupRow
+	var items []GetBalanceForCreditorByGroupRow
 	for rows.Next() {
-		var i GetBalanceForUserByGroupRow
+		var i GetBalanceForCreditorByGroupRow
 		if err := rows.Scan(
 			&i.UpdatedAt,
 			&i.Balance,
@@ -88,4 +88,85 @@ func (q *Queries) GetBalanceForUserByGroup(ctx context.Context, arg GetBalanceFo
 		return nil, err
 	}
 	return items, nil
+}
+
+const getBalanceForDebtorByGroup = `-- name: GetBalanceForDebtorByGroup :many
+SELECT balances.updated_at, balances.balance, users.name, users.email
+  FROM balances JOIN users ON users.id = creditor.id
+WHERE balances.group_id = $1 and user_id = $2
+`
+
+type GetBalanceForDebtorByGroupParams struct {
+	GroupID uuid.NullUUID `json:"group_id"`
+	UserID  uuid.NullUUID `json:"user_id"`
+}
+
+type GetBalanceForDebtorByGroupRow struct {
+	UpdatedAt time.Time      `json:"updated_at"`
+	Balance   string         `json:"balance"`
+	Name      sql.NullString `json:"name"`
+	Email     string         `json:"email"`
+}
+
+func (q *Queries) GetBalanceForDebtorByGroup(ctx context.Context, arg GetBalanceForDebtorByGroupParams) ([]GetBalanceForDebtorByGroupRow, error) {
+	rows, err := q.db.QueryContext(ctx, getBalanceForDebtorByGroup, arg.GroupID, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetBalanceForDebtorByGroupRow
+	for rows.Next() {
+		var i GetBalanceForDebtorByGroupRow
+		if err := rows.Scan(
+			&i.UpdatedAt,
+			&i.Balance,
+			&i.Name,
+			&i.Email,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateBalance = `-- name: UpdateBalance :one
+UPDATE
+  balances
+SET
+  balance = $1, updated_at = NOW()
+WHERE
+  user_id = $2 AND group_id = $3 and creditor_id = $4
+RETURNING user_id, group_id, creditor_id, updated_at, balance
+`
+
+type UpdateBalanceParams struct {
+	Balance    string        `json:"balance"`
+	UserID     uuid.NullUUID `json:"user_id"`
+	GroupID    uuid.NullUUID `json:"group_id"`
+	CreditorID uuid.NullUUID `json:"creditor_id"`
+}
+
+func (q *Queries) UpdateBalance(ctx context.Context, arg UpdateBalanceParams) (Balance, error) {
+	row := q.db.QueryRowContext(ctx, updateBalance,
+		arg.Balance,
+		arg.UserID,
+		arg.GroupID,
+		arg.CreditorID,
+	)
+	var i Balance
+	err := row.Scan(
+		&i.UserID,
+		&i.GroupID,
+		&i.CreditorID,
+		&i.UpdatedAt,
+		&i.Balance,
+	)
+	return i, err
 }
