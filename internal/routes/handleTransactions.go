@@ -18,7 +18,7 @@ type addDebtResult struct {
 	failedDebt   database.CreateDebtParams
 }
 
-func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Request) {
+func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Request) { // TODO: create/update balance when adding transaction
 	type parameters struct {
 		Transactions []struct {
 			Debtor string `json:"debtor"`

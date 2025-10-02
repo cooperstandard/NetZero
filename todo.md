@@ -9,5 +9,6 @@
 * bruno for balances and transactions
 * add limit to group size
 * github action to build and publish to dockerhub
-* rethink transaction flow
+* update or create a balance for a user when creating debt
+* settleup
 
