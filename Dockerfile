@@ -18,7 +18,7 @@ WORKDIR /app
 
 COPY --from=build /build/netzero ./netzero
 
-COPY .env ./
+# COPY .env ./ #TODO: figure out a better solution here
 
 COPY sql ./sql
 
