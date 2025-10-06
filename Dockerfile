@@ -22,8 +22,6 @@ COPY .env ./
 
 COPY sql ./sql
 
-RUN ls -a
-
 EXPOSE 8080
 
 #TODO: for tls traffic
