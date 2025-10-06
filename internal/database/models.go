@@ -12,11 +12,11 @@ import (
 )
 
 type Balance struct {
-	UserID     uuid.NullUUID `json:"user_id"`
-	GroupID    uuid.NullUUID `json:"group_id"`
-	CreditorID uuid.NullUUID `json:"creditor_id"`
-	UpdatedAt  time.Time     `json:"updated_at"`
-	Balance    string        `json:"balance"`
+	UserID     uuid.UUID `json:"user_id"`
+	GroupID    uuid.UUID `json:"group_id"`
+	CreditorID uuid.UUID `json:"creditor_id"`
+	UpdatedAt  time.Time `json:"updated_at"`
+	Balance    string    `json:"balance"`
 }
 
 type Debt struct {

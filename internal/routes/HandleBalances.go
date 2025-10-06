@@ -23,8 +23,8 @@ func (cfg *APIConfig) HandleGetBalanceDebtor(w http.ResponseWriter, r *http.Requ
 	}
 
 	balances, err := cfg.DB.GetBalanceForDebtorByGroup(r.Context(), database.GetBalanceForDebtorByGroupParams{
-		GroupID: uuid.NullUUID{Valid: true, UUID: uuid.MustParse(params.GroupID)},
-		UserID:  uuid.NullUUID{Valid: true, UUID: r.Context().Value(UserID{}).(uuid.UUID)},
+		GroupID: uuid.MustParse(params.GroupID),
+		UserID:  r.Context().Value(UserID{}).(uuid.UUID),
 	})
 
 	if err != nil {
@@ -50,8 +50,8 @@ func (cfg *APIConfig) HandleGetBalanceCreditor(w http.ResponseWriter, r *http.Re
 	}
 
 	balances, err := cfg.DB.GetBalanceForCreditorByGroup(r.Context(), database.GetBalanceForCreditorByGroupParams{
-		GroupID:    uuid.NullUUID{Valid:true, UUID: uuid.MustParse(params.GroupID)},
-		CreditorID: uuid.NullUUID{Valid:true, UUID: uuid.MustParse(params.CreditorID)},
+		GroupID:    uuid.MustParse(params.GroupID),
+		CreditorID: uuid.MustParse(params.CreditorID),
 	})
 
 	if err != nil {

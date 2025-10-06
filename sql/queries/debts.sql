@@ -1,6 +1,6 @@
 -- name: CreateDebt :one
 INSERT INTO debts (id, amount, transaction_id, debtor, creditor, created_at, updated_at)
-    VALUES (gen_new_uuid (), $1, $2, $3, $4, NOW(), NOW())
+    VALUES (gen_new_uuid(), $1, $2, $3, $4, NOW(), NOW())
 RETURNING
     *;
 
@@ -48,3 +48,7 @@ WHERE
 RETURNING
     *;
 
+-- name: DeleteDebtById :one
+DELETE FROM debts
+    WHERE id = $1
+RETURNING *;

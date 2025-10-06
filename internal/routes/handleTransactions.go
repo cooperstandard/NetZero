@@ -16,6 +16,7 @@ type addDebtResult struct {
 	err          error
 	recordedDebt database.Debt
 	failedDebt   database.CreateDebtParams
+	balance 		 database.Balance
 }
 
 func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Request) { // TODO: create/update balance when adding transaction
@@ -75,8 +76,19 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 	for _, v := range params.Transactions {
 		go func(cfg APIConfig, ctx context.Context, debt database.CreateDebtParams, resultChan chan<- addDebtResult) {
 			debtRecord, err := cfg.DB.CreateDebt(ctx, debt)
-			if err != nil {
-				resultChan <- addDebtResult{recordedDebt: debtRecord}
+			if err == nil {
+		balance, err := cfg.DB.InsertOrUpdateBalance(r.Context(), database.InsertOrUpdateBalanceParams{
+					Balance:    debt.Amount,
+					UserID:     debt.Debtor,
+					GroupID:    uuid.MustParse(params.GroupID), //TODO: pass this into the go func
+					CreditorID: debt.Creditor,
+				})
+				if err != nil {
+					cfg.DB.DeleteDebtById(r.Context(), debtRecord.ID)
+					resultChan <- addDebtResult{err: err, failedDebt: debt}
+					return
+				}
+				resultChan <- addDebtResult{recordedDebt: debtRecord, balance: balance}
 			} else {
 				resultChan <- addDebtResult{err: err, failedDebt: debt}
 			}

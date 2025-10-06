@@ -13,7 +13,7 @@ import (
 
 const createDebt = `-- name: CreateDebt :one
 INSERT INTO debts (id, amount, transaction_id, debtor, creditor, created_at, updated_at)
-    VALUES (gen_new_uuid (), $1, $2, $3, $4, NOW(), NOW())
+    VALUES (gen_new_uuid(), $1, $2, $3, $4, NOW(), NOW())
 RETURNING
     id, amount, transaction_id, debtor, creditor, created_at, updated_at, paid
 `
@@ -32,6 +32,28 @@ func (q *Queries) CreateDebt(ctx context.Context, arg CreateDebtParams) (Debt, e
 		arg.Debtor,
 		arg.Creditor,
 	)
+	var i Debt
+	err := row.Scan(
+		&i.ID,
+		&i.Amount,
+		&i.TransactionID,
+		&i.Debtor,
+		&i.Creditor,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Paid,
+	)
+	return i, err
+}
+
+const deleteDebtById = `-- name: DeleteDebtById :one
+DELETE FROM debts
+    WHERE id = $1
+RETURNING id, amount, transaction_id, debtor, creditor, created_at, updated_at, paid
+`
+
+func (q *Queries) DeleteDebtById(ctx context.Context, id uuid.UUID) (Debt, error) {
+	row := q.db.QueryRowContext(ctx, deleteDebtById, id)
 	var i Debt
 	err := row.Scan(
 		&i.ID,

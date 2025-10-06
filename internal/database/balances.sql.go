@@ -20,10 +20,10 @@ RETURNING user_id, group_id, creditor_id, updated_at, balance
 `
 
 type CreateBalanceParams struct {
-	UserID     uuid.NullUUID `json:"user_id"`
-	GroupID    uuid.NullUUID `json:"group_id"`
-	CreditorID uuid.NullUUID `json:"creditor_id"`
-	Balance    string        `json:"balance"`
+	UserID     uuid.UUID `json:"user_id"`
+	GroupID    uuid.UUID `json:"group_id"`
+	CreditorID uuid.UUID `json:"creditor_id"`
+	Balance    string    `json:"balance"`
 }
 
 func (q *Queries) CreateBalance(ctx context.Context, arg CreateBalanceParams) (Balance, error) {
@@ -51,8 +51,8 @@ WHERE balances.group_id = $1 and creditor_id = $2
 `
 
 type GetBalanceForCreditorByGroupParams struct {
-	GroupID    uuid.NullUUID `json:"group_id"`
-	CreditorID uuid.NullUUID `json:"creditor_id"`
+	GroupID    uuid.UUID `json:"group_id"`
+	CreditorID uuid.UUID `json:"creditor_id"`
 }
 
 type GetBalanceForCreditorByGroupRow struct {
@@ -97,8 +97,8 @@ WHERE balances.group_id = $1 and user_id = $2
 `
 
 type GetBalanceForDebtorByGroupParams struct {
-	GroupID uuid.NullUUID `json:"group_id"`
-	UserID  uuid.NullUUID `json:"user_id"`
+	GroupID uuid.UUID `json:"group_id"`
+	UserID  uuid.UUID `json:"user_id"`
 }
 
 type GetBalanceForDebtorByGroupRow struct {
@@ -136,6 +136,37 @@ func (q *Queries) GetBalanceForDebtorByGroup(ctx context.Context, arg GetBalance
 	return items, nil
 }
 
+const insertOrUpdateBalance = `-- name: InsertOrUpdateBalance :one
+INSERT INTO balances (user_id, group_id, creditor_id, updated_at, balance) VALUES ($1, $2, $3, NOW(), $4)
+ON CONFLICT (user_id, group_id, creditor_id) DO UPDATE SET balance = balance + $4, updated_at = NOW()
+RETURNING user_id, group_id, creditor_id, updated_at, balance
+`
+
+type InsertOrUpdateBalanceParams struct {
+	UserID     uuid.UUID `json:"user_id"`
+	GroupID    uuid.UUID `json:"group_id"`
+	CreditorID uuid.UUID `json:"creditor_id"`
+	Balance    string    `json:"balance"`
+}
+
+func (q *Queries) InsertOrUpdateBalance(ctx context.Context, arg InsertOrUpdateBalanceParams) (Balance, error) {
+	row := q.db.QueryRowContext(ctx, insertOrUpdateBalance,
+		arg.UserID,
+		arg.GroupID,
+		arg.CreditorID,
+		arg.Balance,
+	)
+	var i Balance
+	err := row.Scan(
+		&i.UserID,
+		&i.GroupID,
+		&i.CreditorID,
+		&i.UpdatedAt,
+		&i.Balance,
+	)
+	return i, err
+}
+
 const updateBalance = `-- name: UpdateBalance :one
 UPDATE
   balances
@@ -147,10 +178,10 @@ RETURNING user_id, group_id, creditor_id, updated_at, balance
 `
 
 type UpdateBalanceParams struct {
-	Balance    string        `json:"balance"`
-	UserID     uuid.NullUUID `json:"user_id"`
-	GroupID    uuid.NullUUID `json:"group_id"`
-	CreditorID uuid.NullUUID `json:"creditor_id"`
+	Balance    string    `json:"balance"`
+	UserID     uuid.UUID `json:"user_id"`
+	GroupID    uuid.UUID `json:"group_id"`
+	CreditorID uuid.UUID `json:"creditor_id"`
 }
 
 func (q *Queries) UpdateBalance(ctx context.Context, arg UpdateBalanceParams) (Balance, error) {

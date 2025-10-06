@@ -22,4 +22,9 @@ WHERE
   user_id = $2 AND group_id = $3 and creditor_id = $4
 RETURNING *;
 
+-- name: InsertOrUpdateBalance :one
+INSERT INTO balances (user_id, group_id, creditor_id, updated_at, balance) VALUES ($1, $2, $3, NOW(), $4)
+ON CONFLICT (user_id, group_id, creditor_id) DO UPDATE SET balance = balance + $4, updated_at = NOW()
+RETURNING *;
+
 
