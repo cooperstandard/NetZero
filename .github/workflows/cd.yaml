@@ -43,6 +43,6 @@ jobs:
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3
         with:
-          subject-name: index.docker.io/cooperstandard/netzero
+          subject-name: cooperstandard/netzero
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
