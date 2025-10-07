@@ -16,10 +16,10 @@ type addDebtResult struct {
 	err          error
 	recordedDebt database.Debt
 	failedDebt   database.CreateDebtParams
-	balance 		 database.Balance
+	balance      database.Balance
 }
 
-func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Request) { // TODO: create/update balance when adding transaction
+func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Transactions []struct {
 			Debtor string `json:"debtor"`
@@ -76,11 +76,13 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 	for _, v := range params.Transactions {
 		go func(cfg APIConfig, ctx context.Context, debt database.CreateDebtParams, resultChan chan<- addDebtResult) {
 			debtRecord, err := cfg.DB.CreateDebt(ctx, debt)
-			if err == nil {
-		balance, err := cfg.DB.InsertOrUpdateBalance(r.Context(), database.InsertOrUpdateBalanceParams{
+			if err != nil {
+				resultChan <- addDebtResult{err: err, failedDebt: debt}
+			} else {
+				balance, err := cfg.DB.InsertOrUpdateBalance(r.Context(), database.InsertOrUpdateBalanceParams{ // TODO: this and the earlier action should probably be part of the same transaction so we don't have to worry about intermediate errors
 					Balance:    debt.Amount,
 					UserID:     debt.Debtor,
-					GroupID:    uuid.MustParse(params.GroupID), //TODO: pass this into the go func
+					GroupID:    uuid.MustParse(params.GroupID), // TODO: pass this into the go func
 					CreditorID: debt.Creditor,
 				})
 				if err != nil {
@@ -89,8 +91,6 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 					return
 				}
 				resultChan <- addDebtResult{recordedDebt: debtRecord, balance: balance}
-			} else {
-				resultChan <- addDebtResult{err: err, failedDebt: debt}
 			}
 		}(*cfg, r.Context(), database.CreateDebtParams{
 			Amount:        fmt.Sprintf("%d.%d", v.Amount.Dollars, v.Amount.Cents), // TODO: validate the Amount
@@ -117,7 +117,7 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 }
 
 func (cfg *APIConfig) HandleGetTransactions(w http.ResponseWriter, r *http.Request) {
-	//NOTE: expected to be either group_id= or author_id=, if neither is present assume getting transactions for the current user account
+	// NOTE: expected to be either group_id= or author_id=, if neither is present assume getting transactions for the current user account
 	groupID := r.URL.Query().Get("group_id")
 
 	if groupID != "" {
@@ -144,7 +144,7 @@ func (cfg *APIConfig) HandleGetTransactions(w http.ResponseWriter, r *http.Reque
 }
 
 func (cfg *APIConfig) HandleGetTransactionDetails(w http.ResponseWriter, r *http.Request) {
-	//NOTE: takes in a list from the query params and returns debts for those transaction ids
+	// NOTE: takes in a list from the query params and returns debts for those transaction ids
 	// in the form of ?transactions=<transaction1id>,<transaction2id>,...,<transactionnid>
 	transactions := r.URL.Query()["transactions"]
 	if len(transactions) == 0 {
