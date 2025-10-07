@@ -2,6 +2,7 @@ services:
   netzero:
     build: .
     restart: always
+    env_file: ".env"
     ports:
       - 8080:8080
       # - 8081:8081 # this will be for https/tls traffic, but I haven't added that feature yet
