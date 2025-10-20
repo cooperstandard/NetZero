@@ -20,7 +20,7 @@ func main() {
 	const port = "8080"
 	const basePath = "/api/v1"
 
-	// TODO: add sample .env in version control
+	// TODO: update example env
 	godotenv.Load()
 	dbURL := os.Getenv("DB_URL")
 	if dbURL == "" {
