@@ -175,6 +175,7 @@ func (cfg *APIConfig) HandleGetTransactionDetails(w http.ResponseWriter, r *http
 }
 
 func (cfg *APIConfig) HandleDeleteTransaction(w http.ResponseWriter, r *http.Request) {
+	//TODO: do this in a database transaction
 	type parameters struct {
 		TransactionID string
 	}
