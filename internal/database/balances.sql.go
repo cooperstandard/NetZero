@@ -44,6 +44,31 @@ func (q *Queries) CreateBalance(ctx context.Context, arg CreateBalanceParams) (B
 	return i, err
 }
 
+const getBalance = `-- name: GetBalance :one
+SELECT user_id, group_id, creditor_id, updated_at, balance FROM balances
+WHERE
+  user_id = $1 AND group_id = $2 and creditor_id = $3
+`
+
+type GetBalanceParams struct {
+	UserID     uuid.UUID `json:"user_id"`
+	GroupID    uuid.UUID `json:"group_id"`
+	CreditorID uuid.UUID `json:"creditor_id"`
+}
+
+func (q *Queries) GetBalance(ctx context.Context, arg GetBalanceParams) (Balance, error) {
+	row := q.db.QueryRowContext(ctx, getBalance, arg.UserID, arg.GroupID, arg.CreditorID)
+	var i Balance
+	err := row.Scan(
+		&i.UserID,
+		&i.GroupID,
+		&i.CreditorID,
+		&i.UpdatedAt,
+		&i.Balance,
+	)
+	return i, err
+}
+
 const getBalanceForCreditorByGroup = `-- name: GetBalanceForCreditorByGroup :many
 SELECT balances.updated_at, balances.balance, users.name, users.email
   FROM balances JOIN users ON users.id = creditor.id

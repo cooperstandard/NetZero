@@ -13,6 +13,11 @@ SELECT balances.updated_at, balances.balance, users.name, users.email
   FROM balances JOIN users ON users.id = creditor.id
 WHERE balances.group_id = $1 and creditor_id = $2;
 
+-- name: GetBalance :one
+SELECT * FROM balances
+WHERE
+  user_id = $1 AND group_id = $2 and creditor_id = $3;
+
 -- name: UpdateBalance :one
 UPDATE
   balances

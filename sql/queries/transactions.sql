@@ -1,6 +1,6 @@
 -- name: CreateTransaction :one
 INSERT INTO transactions (id, created_at, updated_at, title, description, author_id, group_id)
-    VALUES (gen_random_uuid (), NOW(), NOW(), $1, $2, $3, $4)
+    VALUES (gen_random_uuid(), NOW(), NOW(), $1, $2, $3, $4)
 RETURNING
     *;
 
@@ -20,3 +20,15 @@ FROM
 WHERE
     author_id = $1;
 
+-- name: GetTransactionByID :one
+SELECT
+    *
+FROM
+    transactions
+WHERE
+    id = $1;
+
+-- name: DeleteTransactionById :one
+DELETE FROM transactions
+    WHERE id = $1
+RETURNING *;

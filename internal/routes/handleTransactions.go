@@ -173,3 +173,67 @@ func (cfg *APIConfig) HandleGetTransactionDetails(w http.ResponseWriter, r *http
 
 	util.RespondWithJSON(w, 200, transactionDetails)
 }
+
+func (cfg *APIConfig) HandleDeleteTransaction(w http.ResponseWriter, r *http.Request) {
+	type parameters struct {
+		transactionID string
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	params := parameters{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		util.RespondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
+		return
+	}
+
+	transaction, err := cfg.DB.GetTransactionByID(r.Context(), uuid.MustParse(params.transactionID))
+	if err != nil {
+		util.RespondWithError(w, 404, "unable to locate transaction record", err)
+		return
+	}
+
+	debts, err := cfg.DB.GetDebtsByTransaction(r.Context(), transaction.ID)
+	if err != nil {
+		util.RespondWithError(w, 404, "unable to locate individual debt records", err)
+		return
+	}
+
+	for _, debt := range debts {
+		if debt.Paid {
+			cfg.DB.InsertOrUpdateBalance(r.Context(), database.InsertOrUpdateBalanceParams{
+				UserID:     debt.Creditor,
+				GroupID:    transaction.GroupID,
+				CreditorID: debt.Debtor,
+				Balance:    debt.Amount,
+			})
+		} else {
+			balance, _ := cfg.DB.GetBalance(r.Context(), database.GetBalanceParams{
+				UserID:     debt.Debtor,
+				GroupID:    transaction.GroupID,
+				CreditorID: debt.Creditor,
+			})
+			newBalance := util.SimpleStringToNumeric(balance.Balance)
+			newBalance, ok := newBalance.Subtraction(util.SimpleStringToNumeric(debt.Amount))
+			balanceString, err := newBalance.ValidateAndFormNumericString()
+			if !ok || err != nil {
+				//TODO: this shouldn't happen because we have added correctly when storing the data
+				w.WriteHeader(500)
+				return
+			}
+			cfg.DB.UpdateBalance(r.Context(), database.UpdateBalanceParams{
+				Balance:    balanceString,
+				UserID:     debt.Debtor,
+				GroupID:    transaction.GroupID,
+				CreditorID: debt.Creditor,
+			})
+		}
+		cfg.DB.DeleteDebtById(r.Context(), debt.ID)
+	}
+
+	//TODO: query and rest of this implementation
+	cfg.DB.DeleteTransactionById(r.Context(), transaction.ID)
+
+	w.WriteHeader(204)
+
+}
