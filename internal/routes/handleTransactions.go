@@ -176,7 +176,7 @@ func (cfg *APIConfig) HandleGetTransactionDetails(w http.ResponseWriter, r *http
 
 func (cfg *APIConfig) HandleDeleteTransaction(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		transactionID string
+		TransactionID string
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -187,7 +187,7 @@ func (cfg *APIConfig) HandleDeleteTransaction(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	transaction, err := cfg.DB.GetTransactionByID(r.Context(), uuid.MustParse(params.transactionID))
+	transaction, err := cfg.DB.GetTransactionByID(r.Context(), uuid.MustParse(params.TransactionID))
 	if err != nil {
 		util.RespondWithError(w, 404, "unable to locate transaction record", err)
 		return
