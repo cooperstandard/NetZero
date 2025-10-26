@@ -52,6 +52,7 @@ func main() {
 	log.Println("connected to DB starting server")
 
 	apiCfg := routes.APIConfig{
+		DBConn: 		 dbConn,
 		DB:          dbQueries,
 		Platform:    platform,
 		TokenSecret: os.Getenv("TOKEN_SECRET"),

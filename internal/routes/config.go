@@ -2,6 +2,7 @@
 package routes
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/cooperstandard/NetZero/internal/database"
@@ -9,6 +10,7 @@ import (
 )
 
 type APIConfig struct {
+	DBConn 			*sql.DB
 	DB          *database.Queries
 	TokenSecret string
 	AdminKey    string

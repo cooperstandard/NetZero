@@ -42,6 +42,15 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	tx, err := cfg.DBConn.Begin()
+	if err != nil {
+		util.RespondWithError(w, http.StatusInternalServerError, "internal server error", err)
+		return
+	}
+	defer tx.Rollback()
+
+	qtx := cfg.DB.WithTx(tx)
+
 	if len(params.Transactions) > 50 || len(params.Transactions) == 0 {
 		util.RespondWithError(w, 400, "please batch records into groups of 50 or fewer to prevent service slow downs", fmt.Errorf("invalid number of records: %d", len(params.Transactions)))
 		return
@@ -57,7 +66,7 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 		}
 	} else {
 
-		transaction, err := cfg.DB.CreateTransaction(r.Context(), database.CreateTransactionParams{
+		transaction, err := qtx.CreateTransaction(r.Context(), database.CreateTransactionParams{
 			Title:       params.Title,
 			Description: sql.NullString{},
 			AuthorID:    uuid.MustParse(params.Creditor),
@@ -70,29 +79,29 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 		transactionID = transaction.ID
 	}
 	resultChan := make(chan addDebtResult)
-	var failed []database.CreateDebtParams
 	var succeeded []database.Debt
 
 	for _, v := range params.Transactions {
-		go func(cfg APIConfig, ctx context.Context, debt database.CreateDebtParams, resultChan chan<- addDebtResult) {
-			debtRecord, err := cfg.DB.CreateDebt(ctx, debt)
+		// NOTE: was expirmenting with paralelizing this operation but need to look into how transactions work accross threads
+		// go func(qtx *database.Queries, ctx context.Context, debt database.CreateDebtParams, resultChan chan<- addDebtResult) {
+		func(qtx *database.Queries, ctx context.Context, debt database.CreateDebtParams, resultChan chan<- addDebtResult) {
+			debtRecord, err := qtx.CreateDebt(ctx, debt)
 			if err != nil {
 				resultChan <- addDebtResult{err: err, failedDebt: debt}
 			} else {
-				balance, err := cfg.DB.InsertOrUpdateBalance(r.Context(), database.InsertOrUpdateBalanceParams{ // TODO: this and the earlier action should probably be part of the same transaction so we don't have to worry about intermediate errors
+				balance, err := qtx.InsertOrUpdateBalance(r.Context(), database.InsertOrUpdateBalanceParams{
 					Balance:    debt.Amount,
 					UserID:     debt.Debtor,
 					GroupID:    uuid.MustParse(params.GroupID), // TODO: pass this into the go func
 					CreditorID: debt.Creditor,
 				})
 				if err != nil {
-					cfg.DB.DeleteDebtById(r.Context(), debtRecord.ID)
 					resultChan <- addDebtResult{err: err, failedDebt: debt}
 					return
 				}
 				resultChan <- addDebtResult{recordedDebt: debtRecord, balance: balance}
 			}
-		}(*cfg, r.Context(), database.CreateDebtParams{
+		}(qtx, r.Context(), database.CreateDebtParams{
 			Amount:        fmt.Sprintf("%d.%d", v.Amount.Dollars, v.Amount.Cents), // TODO: validate the Amount
 			TransactionID: transactionID,
 			Debtor:        uuid.MustParse(v.Debtor),
@@ -105,15 +114,17 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 		if result.err != nil {
 			succeeded = append(succeeded, result.recordedDebt)
 		} else {
-			failed = append(failed, result.failedDebt)
+			util.RespondWithError(w, 405, "unable to create debt", nil)
+			return
 		}
 	}
 
+	tx.Commit()
+
 	util.RespondWithJSON(w, 200, struct {
-		FailedTransactions     []database.CreateDebtParams `json:"failed_transactions,omitempty"`
-		TransactionID          uuid.UUID                   `json:"transaction_id"`
-		SuccessfulTransactions []database.Debt             `json:"successful_transactions,omitempty"`
-	}{failed, transactionID, succeeded})
+		TransactionID uuid.UUID       `json:"transaction_id"`
+		Transactions  []database.Debt `json:"transactions,omitempty"`
+	}{transactionID, succeeded})
 }
 
 func (cfg *APIConfig) HandleGetTransactions(w http.ResponseWriter, r *http.Request) {
@@ -175,7 +186,7 @@ func (cfg *APIConfig) HandleGetTransactionDetails(w http.ResponseWriter, r *http
 }
 
 func (cfg *APIConfig) HandleDeleteTransaction(w http.ResponseWriter, r *http.Request) {
-	//TODO: do this in a database transaction
+	// TODO: do this in a database transaction
 	type parameters struct {
 		TransactionID string
 	}
@@ -188,13 +199,22 @@ func (cfg *APIConfig) HandleDeleteTransaction(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	transaction, err := cfg.DB.GetTransactionByID(r.Context(), uuid.MustParse(params.TransactionID))
+	tx, err := cfg.DBConn.Begin()
+	if err != nil {
+		util.RespondWithError(w, http.StatusInternalServerError, "internal server error", err)
+		return
+	}
+	defer tx.Rollback()
+
+	qtx := cfg.DB.WithTx(tx)
+
+	transaction, err := qtx.GetTransactionByID(r.Context(), uuid.MustParse(params.TransactionID))
 	if err != nil {
 		util.RespondWithError(w, 404, "unable to locate transaction record", err)
 		return
 	}
 
-	debts, err := cfg.DB.GetDebtsByTransaction(r.Context(), transaction.ID)
+	debts, err := qtx.GetDebtsByTransaction(r.Context(), transaction.ID)
 	if err != nil {
 		util.RespondWithError(w, 404, "unable to locate individual debt records", err)
 		return
@@ -202,39 +222,55 @@ func (cfg *APIConfig) HandleDeleteTransaction(w http.ResponseWriter, r *http.Req
 
 	for _, debt := range debts {
 		if debt.Paid {
-			cfg.DB.InsertOrUpdateBalance(r.Context(), database.InsertOrUpdateBalanceParams{
+			_, err = qtx.InsertOrUpdateBalance(r.Context(), database.InsertOrUpdateBalanceParams{
 				UserID:     debt.Creditor,
 				GroupID:    transaction.GroupID,
 				CreditorID: debt.Debtor,
 				Balance:    debt.Amount,
 			})
+			if err != nil {
+				util.RespondWithError(w, http.StatusInternalServerError, "internal server error", err)
+				return
+			}
 		} else {
-			balance, _ := cfg.DB.GetBalance(r.Context(), database.GetBalanceParams{
+			balance, err := qtx.GetBalance(r.Context(), database.GetBalanceParams{
 				UserID:     debt.Debtor,
 				GroupID:    transaction.GroupID,
 				CreditorID: debt.Creditor,
 			})
+			if err != nil {
+				util.RespondWithError(w, http.StatusInternalServerError, "internal server error", err)
+				return
+			}
 			newBalance := util.SimpleStringToNumeric(balance.Balance)
 			newBalance, ok := newBalance.Subtraction(util.SimpleStringToNumeric(debt.Amount))
 			balanceString, err := newBalance.ValidateAndFormNumericString()
 			if !ok || err != nil {
-				//TODO: this shouldn't happen because we have added correctly when storing the data
+				// TODO: this shouldn't happen because we have added correctly when storing the data
 				w.WriteHeader(500)
 				return
 			}
-			cfg.DB.UpdateBalance(r.Context(), database.UpdateBalanceParams{
+			qtx.UpdateBalance(r.Context(), database.UpdateBalanceParams{
 				Balance:    balanceString,
 				UserID:     debt.Debtor,
 				GroupID:    transaction.GroupID,
 				CreditorID: debt.Creditor,
 			})
+			if err != nil {
+				util.RespondWithError(w, http.StatusInternalServerError, "internal server error", err)
+				return
+			}
 		}
-		cfg.DB.DeleteDebtById(r.Context(), debt.ID)
+		qtx.DeleteDebtById(r.Context(), debt.ID)
 	}
 
-	//TODO: query and rest of this implementation
-	cfg.DB.DeleteTransactionById(r.Context(), transaction.ID)
+	// TODO: query and rest of this implementation
+	_, err = qtx.DeleteTransactionById(r.Context(), transaction.ID)
+	if err != nil {
+		util.RespondWithError(w, http.StatusInternalServerError, "internal server error", err)
+		return
+	}
 
 	w.WriteHeader(204)
-
+	tx.Commit()
 }

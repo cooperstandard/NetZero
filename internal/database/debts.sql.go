@@ -191,11 +191,54 @@ func (q *Queries) GetDebtsByTransaction(ctx context.Context, transactionID uuid.
 	return items, nil
 }
 
+const getUnpaidDebtsByCreditorAndDebtor = `-- name: GetUnpaidDebtsByCreditorAndDebtor :many
+SELECT
+    debts.id
+FROM
+    debts
+JOIN
+    transactions
+ON
+    debts.transaction_id = transactions.id
+WHERE
+    debts.paid = FALSE AND $1 = debts.debtor AND $2 = debts.creditor AND transactions.group_id = $3
+`
+
+type GetUnpaidDebtsByCreditorAndDebtorParams struct {
+	Debtor   uuid.UUID `json:"debtor"`
+	Creditor uuid.UUID `json:"creditor"`
+	GroupID  uuid.UUID `json:"group_id"`
+}
+
+func (q *Queries) GetUnpaidDebtsByCreditorAndDebtor(ctx context.Context, arg GetUnpaidDebtsByCreditorAndDebtorParams) ([]uuid.UUID, error) {
+	rows, err := q.db.QueryContext(ctx, getUnpaidDebtsByCreditorAndDebtor, arg.Debtor, arg.Creditor, arg.GroupID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uuid.UUID
+	for rows.Next() {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const payDebts = `-- name: PayDebts :one
 UPDATE
     debts
 SET
-    paid = TRUE
+    paid = TRUE,
+    updated_at = NOW()
 WHERE
     id = $1
 RETURNING
@@ -222,7 +265,8 @@ const payDebtsByTransaction = `-- name: PayDebtsByTransaction :many
 UPDATE
     debts
 SET
-    paid = TRUE
+    paid = TRUE,
+    updated_at = NOW()
 WHERE
     transaction_id = $1
 RETURNING
