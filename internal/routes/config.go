@@ -10,7 +10,7 @@ import (
 )
 
 type APIConfig struct {
-	DBConn 			*sql.DB
+	DBConn      *sql.DB
 	DB          *database.Queries
 	TokenSecret string
 	AdminKey    string
