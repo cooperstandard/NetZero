@@ -14,7 +14,7 @@ import (
 
 const createTransaction = `-- name: CreateTransaction :one
 INSERT INTO transactions (id, created_at, updated_at, title, description, author_id, group_id)
-    VALUES (gen_random_uuid (), NOW(), NOW(), $1, $2, $3, $4)
+    VALUES (gen_random_uuid(), NOW(), NOW(), $1, $2, $3, $4)
 RETURNING
     id, created_at, updated_at, title, description, author_id, group_id
 `
@@ -33,6 +33,51 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		arg.AuthorID,
 		arg.GroupID,
 	)
+	var i Transaction
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Description,
+		&i.AuthorID,
+		&i.GroupID,
+	)
+	return i, err
+}
+
+const deleteTransactionById = `-- name: DeleteTransactionById :one
+DELETE FROM transactions
+    WHERE id = $1
+RETURNING id, created_at, updated_at, title, description, author_id, group_id
+`
+
+func (q *Queries) DeleteTransactionById(ctx context.Context, id uuid.UUID) (Transaction, error) {
+	row := q.db.QueryRowContext(ctx, deleteTransactionById, id)
+	var i Transaction
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Description,
+		&i.AuthorID,
+		&i.GroupID,
+	)
+	return i, err
+}
+
+const getTransactionByID = `-- name: GetTransactionByID :one
+SELECT
+    id, created_at, updated_at, title, description, author_id, group_id
+FROM
+    transactions
+WHERE
+    id = $1
+`
+
+func (q *Queries) GetTransactionByID(ctx context.Context, id uuid.UUID) (Transaction, error) {
+	row := q.db.QueryRowContext(ctx, getTransactionByID, id)
 	var i Transaction
 	err := row.Scan(
 		&i.ID,

@@ -28,11 +28,24 @@ FROM
 WHERE
     $1 = creditor;
 
+-- name: GetUnpaidDebtsByCreditorAndDebtor :many
+SELECT
+    debts.id
+FROM
+    debts
+JOIN
+    transactions
+ON
+    debts.transaction_id = transactions.id
+WHERE
+    debts.paid = FALSE AND $1 = debts.debtor AND $2 = debts.creditor AND transactions.group_id = $3;
+
 -- name: PayDebts :one
 UPDATE
     debts
 SET
-    paid = TRUE
+    paid = TRUE,
+    updated_at = NOW()
 WHERE
     id = $1
 RETURNING
@@ -42,7 +55,8 @@ RETURNING
 UPDATE
     debts
 SET
-    paid = TRUE
+    paid = TRUE,
+    updated_at = NOW()
 WHERE
     transaction_id = $1
 RETURNING

@@ -23,6 +23,15 @@ func (a Numeric) ValidateAndFormNumericString() (string, error) {
 	return fmt.Sprintf("%20d.%d", a.Dollars, a.Cents), nil
 }
 
+func SimpleStringToNumeric(s string) Numeric {
+
+	parts := strings.Split(s, ".")
+	dollars, _ := strconv.Atoi(parts[0])
+	cents, _ := strconv.Atoi(parts[1])
+	return Numeric{Dollars: uint(dollars), Cents: uint(cents)}
+
+}
+
 func StringToNumeric(s string) (Numeric, error) {
 	parts := strings.Split(s, ".")
 	dollars, err := strconv.Atoi(parts[0])
