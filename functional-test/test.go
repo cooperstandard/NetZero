@@ -46,10 +46,10 @@ func main() {
 	godotenv.Load()
 
 	adminKey := os.Getenv("ADMIN_KEY")
-	reset(adminKey)
 
 	client := &http.Client{}
 	log.Info(fmt.Sprintf("received code %d from call to health", health(client)))
+	log.Info("reset DB", "successful", reset(client, adminKey))
 }
 
 type registerParameters struct {
@@ -84,8 +84,9 @@ func login(params loginParameters) (routes.User, error) {
 	return routes.User{}, nil
 }
 
-func reset(key string) bool {
-	return false
+func reset(client *http.Client, key string) bool {
+	_, status := doRequest(client, "POST", "/admin/reset", nil, key)
+	return status != 0 && status < 300
 }
 
 
