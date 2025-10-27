@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 
-	functionaltest "github.com/cooperstandard/NetZero/functional-test"
 	"github.com/cooperstandard/NetZero/internal/database"
 	"github.com/cooperstandard/NetZero/internal/routes"
 	"github.com/cooperstandard/NetZero/internal/util"
@@ -86,11 +85,6 @@ func main() {
 	// register routes
 	for k, v := range paths {
 		register(apiMux, k, v)
-	}
-
-	if apiCfg.Platform == "test" {
-		//TODO: not sure if this is how I want to run functional tests. May just start as a seperate
-		go functionaltest.Start()
 	}
 
 	srv := &http.Server{

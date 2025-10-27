@@ -18,6 +18,7 @@ case "$1" in
     docker-compose down
     docker-compose up --build -d
     ;;
-
-
+  test)
+    go run functional-test/test.go
+    ;;
 esac
