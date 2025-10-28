@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 
@@ -14,6 +15,18 @@ import (
 )
 
 const basepath string = "http://localhost:8080/api/v1"
+
+type registerParameters struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
+}
+
+type loginParameters struct {
+	Email         string `json:"email"`
+	Password      string `json:"password"`
+	ExpiresInSecs int    `json:"expiresInSeconds"` // TODO: for testing, configure this in the environment
+}
 
 // main is the entry point of the functional test suite
 func main() {
@@ -50,12 +63,15 @@ func main() {
 	client := &http.Client{}
 	log.Info(fmt.Sprintf("received code %d from call to health", health(client)))
 	log.Info("reset DB", "successful", reset(client, adminKey))
-}
-
-type registerParameters struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Name     string `json:"name"`
+	user1, err := register(client, registerParameters{
+		Email:    "test@test.com",
+		Password: "pass",
+		Name:     "testy mctestface",
+	})
+	if err != nil {
+		log.Fatal("register user failed", "error", err)
+	}
+	log.Info("created user", "email", user1.Email)
 }
 
 func health(client *http.Client) int {
@@ -63,21 +79,20 @@ func health(client *http.Client) int {
 	return status
 }
 
-func register(client http.Client, params registerParameters) (routes.User, error) {
+func register(client *http.Client, params registerParameters) (routes.User, error) {
 	body, _ := json.Marshal(params)
-	req, err := http.NewRequest("POST", basepath+"/register", bytes.NewBuffer(body))
-	if err != nil {
-		return routes.User{}, err
+	resp, status := doRequest(client, "POST", "/register", body, "")
+	if status != 201 && status != 200 {
+		log.Error("status for request", "status", status)
+		return routes.User{}, fmt.Errorf("unable to register user: %s", params.Email)
 	}
-	client.Do(req)
 
-	return routes.User{}, nil
-}
+	var user routes.User
 
-type loginParameters struct {
-	Email         string `json:"email"`
-	Password      string `json:"password"`
-	ExpiresInSecs int    `json:"expiresInSeconds"` // TODO: for testing, configure this in the environment
+	respBody, _ := io.ReadAll(resp.Body)
+	_ = json.Unmarshal(respBody, &user)
+
+	return user, nil
 }
 
 func login(params loginParameters) (routes.User, error) {
@@ -88,7 +103,6 @@ func reset(client *http.Client, key string) bool {
 	_, status := doRequest(client, "POST", "/admin/reset", nil, key)
 	return status != 0 && status < 300
 }
-
 
 func doRequest(client *http.Client, method string, endpoint string, body []byte, token string) (*http.Response, int) {
 	var req *http.Request
@@ -106,11 +120,9 @@ func doRequest(client *http.Client, method string, endpoint string, body []byte,
 	}
 
 	res, err := client.Do(req)
-
 	if err != nil {
 		return nil, 0
 	}
 
 	return res, res.StatusCode
 }
-
