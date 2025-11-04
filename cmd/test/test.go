@@ -29,8 +29,6 @@ type loginParameters struct {
 // main is the entry point of the functional test suite
 func main() {
 	/*TODO: run some golden test cases here
-	    	01) reset db
-	  			    	2a) login
 	    	03) create group
 	  		04) join group
 	  		05) create another user and have it join the group
@@ -72,14 +70,16 @@ func main() {
 	}
 	log.Info("created user", "email", user1.Email)
 
+	// 03) login
 	user1, status := login(client, loginParameters{
 		Email:         "test@test.com",
 		Password:      "pass",
 		ExpiresInSecs: 100,
 	})
-
 	if status != 200 {
 		log.Fatal("failed to login user 1", "error", err)
 	}
 	log.Info("login successful for", "email", user1.Email)
+
+	// 04) create group
 }
