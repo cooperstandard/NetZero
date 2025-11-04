@@ -31,8 +31,20 @@ func register(client *http.Client, params registerParameters) (routes.User, erro
 	return user, nil
 }
 
-func login(params loginParameters) (routes.User, error) {
-	return routes.User{}, nil
+func login(client *http.Client, params loginParameters) (routes.User, int) {
+	body, _ := json.Marshal(params)
+	resp, status := doRequest(client, "POST", "/login", body, "")
+	if status != 200 {
+		log.Error("login failed with", "status", status)
+		return routes.User{}, status
+	}
+
+	var user routes.User
+
+	respBody, _ := io.ReadAll(resp.Body)
+	_ = json.Unmarshal(respBody, &user)
+
+	return user, status
 }
 
 func reset(client *http.Client, key string) bool {

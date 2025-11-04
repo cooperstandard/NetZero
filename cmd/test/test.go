@@ -72,12 +72,14 @@ func main() {
 	}
 	log.Info("created user", "email", user1.Email)
 
-	user1, err = login(loginParameters{
+	user1, status := login(client, loginParameters{
 		Email:         "test@test.com",
 		Password:      "pass",
 		ExpiresInSecs: 100,
 	})
-	if err != nil {
+
+	if status != 200 {
 		log.Fatal("failed to login user 1", "error", err)
 	}
+	log.Info("login successful for", "email", user1.Email)
 }
