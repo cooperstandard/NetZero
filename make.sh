@@ -19,6 +19,6 @@ case "$1" in
     docker-compose up --build -d
     ;;
   test)
-    go run cmd/test/test.go
+    go run ./cmd/test
     ;;
 esac
