@@ -15,6 +15,11 @@ func health(client *http.Client) int {
 	return status
 }
 
+func createGroup(client *http.Client, groupName string) (routes.Group, error) {
+
+	return routes.Group{}, nil
+}
+
 func register(client *http.Client, params registerParameters) (routes.User, error) {
 	body, _ := json.Marshal(params)
 	resp, status := doRequest(client, "POST", "/register", body, "")
