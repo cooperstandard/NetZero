@@ -32,4 +32,3 @@ INSERT INTO balances (user_id, group_id, creditor_id, updated_at, balance) VALUE
 ON CONFLICT (user_id, group_id, creditor_id) DO UPDATE SET balance = balance + $4, updated_at = NOW()
 RETURNING *;
 
-
