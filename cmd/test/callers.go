@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/charmbracelet/log"
-	"github.com/cooperstandard/NetZero/internal/routes"
 	"io"
 	"net/http"
+
+	"github.com/charmbracelet/log"
+	"github.com/cooperstandard/NetZero/internal/routes"
 )
 
 func health(client *http.Client) int {
@@ -15,9 +16,27 @@ func health(client *http.Client) int {
 	return status
 }
 
-func createGroup(client *http.Client, groupName string) (routes.Group, error) {
+func createGroup(client *http.Client, groupName string, token string) (routes.Group, error) {
+	params, err := json.Marshal(struct {
+		Name string `json:"name"`
+	}{Name: groupName})
 
-	return routes.Group{}, nil
+	if err != nil {
+		return routes.Group{}, err
+	}
+
+	response, status := doRequest(client, "POST", "/groups", params, token)
+	if status != 200 {
+		fmt.Printf("recieved status %d while trying to create group\n", status)
+		return routes.Group{}, fmt.Errorf("unable to create group with name %s", groupName)
+	}
+
+	var group routes.Group
+
+	respBody, _ := io.ReadAll(response.Body)
+	json.Unmarshal(respBody, &group)
+
+	return group, nil
 }
 
 func register(client *http.Client, params registerParameters) (routes.User, error) {

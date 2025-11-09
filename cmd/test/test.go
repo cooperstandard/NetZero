@@ -3,11 +3,11 @@ package main
 
 import (
 	"fmt"
-
 	"net/http"
 	"os"
 
 	"github.com/charmbracelet/log"
+	
 
 	"github.com/joho/godotenv"
 )
@@ -29,7 +29,6 @@ type loginParameters struct {
 // main is the entry point of the functional test suite
 func main() {
 	/*TODO: run some golden test cases here
-	    	03) create group
 	  		04) join group
 	  		05) create another user and have it join the group
 	  		06) create another group, join with user 1, make sure user 2 does not show up as a member
@@ -56,30 +55,24 @@ func main() {
 
 	client := &http.Client{}
 	log.Info(fmt.Sprintf("received code %d from call to health", health(client)))
+
+	if health(client) != 204 {
+		return
+	}
+
 	// 01) reset db
 	log.Info("reset DB", "successful", reset(client, adminKey))
 
-	//02) register user
-	user1, err := register(client, registerParameters{
-		Email:    "test@test.com",
-		Password: "pass",
-		Name:     "testy mctestface",
-	})
+	// 02) register user
+	user := createAndLoginUser(client, "test@email.com", "password", "testy mctestface")
+
+	// 03) create group
+	group, err := createGroup(client, "group 1", user.Token)
 	if err != nil {
-		log.Fatal("register user failed", "error", err)
+		log.Fatal("group creation failed", "error", err)
 	}
-	log.Info("created user", "email", user1.Email)
+	log.Info("created group", "group ID", group.ID)
 
-	// 03) login
-	user1, status := login(client, loginParameters{
-		Email:         "test@test.com",
-		Password:      "pass",
-		ExpiresInSecs: 100,
-	})
-	if status != 200 {
-		log.Fatal("failed to login user 1", "error", err)
-	}
-	log.Info("login successful for", "email", user1.Email)
-
-	// 04) create group
+	// 04) join group
 }
+
