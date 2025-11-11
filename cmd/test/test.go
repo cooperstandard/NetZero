@@ -29,7 +29,6 @@ type loginParameters struct {
 // main is the entry point of the functional test suite
 func main() {
 	/*TODO: run some golden test cases here
-	  		04) join group
 	  		05) create another user and have it join the group
 	  		06) create another group, join with user 1, make sure user 2 does not show up as a member
 	    	06) create a debt for user 2
@@ -74,5 +73,11 @@ func main() {
 	log.Info("created group", "group ID", group.ID)
 
 	// 04) join group
+	err = joinGroup(client, "group 1", user.Token)
+
+	if err != nil {
+		log.Fatal("unable to join group")
+	}
+	log.Info("successfully joined the group")
 }
 

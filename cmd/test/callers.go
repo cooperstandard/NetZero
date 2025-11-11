@@ -39,6 +39,24 @@ func createGroup(client *http.Client, groupName string, token string) (routes.Gr
 	return group, nil
 }
 
+func joinGroup(client *http.Client, groupName string, token string) error {
+	params, err := json.Marshal(struct {
+		Name string `json:"group_name"`
+	}{Name: groupName})
+
+	if err != nil {
+		return err
+	}
+
+	_, status := doRequest(client, "POST", "/groups/join", params, token)
+	
+	if status != 204 {
+		return fmt.Errorf("unable to join group")
+	}
+
+	return nil
+}
+
 func register(client *http.Client, params registerParameters) (routes.User, error) {
 	body, _ := json.Marshal(params)
 	resp, status := doRequest(client, "POST", "/register", body, "")
