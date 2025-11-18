@@ -29,7 +29,6 @@ type loginParameters struct {
 // main is the entry point of the functional test suite
 func main() {
 	/*TODO: run some golden test cases here
-	  		06) create another group, join with user 1, make sure user 2 does not show up as a member
 	    	06) create a debt for user 2
 	  		07) check transaction record for user 1 and user 2
 	  		08) create a debt for user 1
@@ -43,6 +42,7 @@ func main() {
 	  		16) delete user 1s paid debt
 	  		17) make sure that user 2s balance is updated
 	  		18) settle up user 2, make sure that all balances are now 0
+				19) create user3, do some transactions between the users, make sure the record is right, settle up, make sure the record is right
 	*/
 
 	log.Warn("starting functional tests")
@@ -65,14 +65,14 @@ func main() {
 	user1 := createAndLoginUser(client, "test@email.com", "password", "testy mctestface")
 
 	// 03) create group
-	group, err := createGroup(client, "group 1", user1.Token)
+	group1, err := createGroup(client, "group 1", user1.Token)
 	if err != nil {
 		log.Fatal("group creation failed", "error", err)
 	}
-	log.Info("created group", "group ID", group.ID)
+	log.Info("created group", "group ID", group1.ID)
 
 	// 04) join group
-	err = joinGroup(client, "group 1", user1.Token)
+	err = joinGroup(client, group1.Name, user1.Token)
 
 	if err != nil {
 		log.Fatal("unable to join group")
@@ -82,12 +82,30 @@ func main() {
 	// 05) create another user and have it join the group
 	user2 := createAndLoginUser(client, "test2@email.com", "password", "another clever name")
 
-	err = joinGroup(client, "group 1", user2.Token)
+	err = joinGroup(client, group1.Name, user2.Token)
 	if err != nil {
 		log.Fatal("unable to join group with user 2")
 	}
 
 	log.Info("successfully created second user and joined the group")
+
+	// 06) create another group, join with user 1, make sure user 2 does not show up as a member
+	group2, err := createGroup(client, "group 2", user2.Token)
+	if err != nil {
+		log.Fatal("unable to create a new group")
+	}
+
+	err = joinGroup(client, group2.Name, user1.Token)
+	if err != nil {
+		log.Fatal("unable to join group with user 2")
+	}
+
+	users := getGroupMembers(client, group2.ID.String(), user2.Token)
+	fmt.Println(users)
+
+
+
+
 
 }
 

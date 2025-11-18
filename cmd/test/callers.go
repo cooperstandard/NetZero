@@ -39,6 +39,25 @@ func createGroup(client *http.Client, groupName string, token string) (routes.Gr
 	return group, nil
 }
 
+func getGroupMembers(client *http.Client, groupID, token string) []string {
+	resp, status := doRequest(client, "GET", "/groups/members/" + groupID, nil, token)
+	if status != 200 {
+		return nil
+	}
+
+	var users []routes.User
+	respBody, _ := io.ReadAll(resp.Body)
+	_ = json.Unmarshal(respBody, &users)
+
+	var ids []string
+	for _, v := range users {
+		ids = append(ids, v.ID.String())
+	}
+
+
+	return ids
+}
+
 func joinGroup(client *http.Client, groupName string, token string) error {
 	params, err := json.Marshal(struct {
 		Name string `json:"group_name"`
