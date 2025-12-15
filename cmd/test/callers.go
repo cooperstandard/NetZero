@@ -39,6 +39,13 @@ func createGroup(client *http.Client, groupName string, token string) (routes.Gr
 	return group, nil
 }
 
+func createDebt(client *http.Client, groupID, token string) string {
+
+
+
+	return ""
+}
+
 func getGroupMembers(client *http.Client, groupID, token string) []string {
 	resp, status := doRequest(client, "GET", "/groups/members/" + groupID, nil, token)
 	if status != 200 {
@@ -135,3 +142,4 @@ func doRequest(client *http.Client, method string, endpoint string, body []byte,
 
 	return res, res.StatusCode
 }
+
