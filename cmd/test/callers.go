@@ -20,7 +20,6 @@ func createGroup(client *http.Client, groupName string, token string) (routes.Gr
 	params, err := json.Marshal(struct {
 		Name string `json:"name"`
 	}{Name: groupName})
-
 	if err != nil {
 		return routes.Group{}, err
 	}
@@ -39,15 +38,16 @@ func createGroup(client *http.Client, groupName string, token string) (routes.Gr
 	return group, nil
 }
 
-func createDebt(client *http.Client, groupID, token string) string {
-
-
-
+func createDebt(client *http.Client, groupID, token string, debtor, creditor string, amount struct {
+	dollars int
+	cents   int
+},
+) string {
 	return ""
 }
 
 func getGroupMembers(client *http.Client, groupID, token string) []string {
-	resp, status := doRequest(client, "GET", "/groups/members/" + groupID, nil, token)
+	resp, status := doRequest(client, "GET", "/groups/members/"+groupID, nil, token)
 	if status != 200 {
 		return nil
 	}
@@ -61,7 +61,6 @@ func getGroupMembers(client *http.Client, groupID, token string) []string {
 		ids = append(ids, v.ID.String())
 	}
 
-
 	return ids
 }
 
@@ -69,13 +68,12 @@ func joinGroup(client *http.Client, groupName string, token string) error {
 	params, err := json.Marshal(struct {
 		Name string `json:"group_name"`
 	}{Name: groupName})
-
 	if err != nil {
 		return err
 	}
 
 	_, status := doRequest(client, "POST", "/groups/join", params, token)
-	
+
 	if status != 204 {
 		return fmt.Errorf("unable to join group")
 	}
@@ -142,4 +140,3 @@ func doRequest(client *http.Client, method string, endpoint string, body []byte,
 
 	return res, res.StatusCode
 }
-

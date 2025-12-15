@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/charmbracelet/log"
-	
 
 	"github.com/joho/godotenv"
 )
@@ -29,7 +28,6 @@ type loginParameters struct {
 // main is the entry point of the functional test suite
 func main() {
 	/*TODO: run some golden test cases here
-	    	06) create a debt for user 2
 	  		07) check transaction record for user 1 and user 2
 	  		08) create a debt for user 1
 	    	09) check that transaction record and balances are as expected for user 1 and user 2
@@ -73,7 +71,6 @@ func main() {
 
 	// 04) join group
 	err = joinGroup(client, group1.Name, user1.Token)
-
 	if err != nil {
 		log.Fatal("unable to join group")
 	}
@@ -103,9 +100,10 @@ func main() {
 	users := getGroupMembers(client, group2.ID.String(), user2.Token)
 	fmt.Println(users)
 
-
-
-
-
+	// 07) create a debt for user 2
+	debtID := createDebt(client, "", "", "", "", struct {
+		dollars int
+		cents   int
+	}{1, 1})
+	log.Info("successfully created debt", "debtID", debtID)
 }
-
