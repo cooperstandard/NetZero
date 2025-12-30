@@ -25,6 +25,21 @@ type loginParameters struct {
 	ExpiresInSecs int    `json:"expiresInSeconds"` // TODO: for testing, configure this in the environment
 }
 
+type debtRecord struct {
+	Debtor string `json:"debtor"`
+	Amount struct {
+		Dollars int `json:"dollars"`
+		Cents   int `json:"cents"`
+	} `json:"amount"`
+}
+
+type createDebtParameters struct {
+	Transactions []debtRecord `json:"transactions"`
+	Creditor     string       `json:"creditor"`
+	GroupID      string       `json:"group_id"`
+	Title        string       `json:"title"`
+}
+
 // main is the entry point of the functional test suite
 func main() {
 	/*TODO: run some golden test cases here
@@ -101,9 +116,13 @@ func main() {
 	fmt.Println(users)
 
 	// 07) create a debt for user 2
-	debtID := createDebt(client, "", "", "", "", struct {
-		dollars int
-		cents   int
+	//func createDebt(client *http.Client, groupID, token string, debtor, creditor string, title string, amount struct {
+	debtID := createDebt(client, group1.ID.String(), user1.Token, user2.ID.String(), user1.ID.String(), "Debt 1", struct {
+		Dollars int `json:"dollars"`
+		Cents   int `json:"cents"`
 	}{1, 1})
+	if debtID == "" {
+		log.Fatal("failed to create debt")
+	}
 	log.Info("successfully created debt", "debtID", debtID)
 }

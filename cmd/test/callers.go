@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/charmbracelet/log"
+	"github.com/cooperstandard/NetZero/internal/database"
 	"github.com/cooperstandard/NetZero/internal/routes"
+	"github.com/google/uuid"
 )
 
 func health(client *http.Client) int {
@@ -38,12 +41,37 @@ func createGroup(client *http.Client, groupName string, token string) (routes.Gr
 	return group, nil
 }
 
-func createDebt(client *http.Client, groupID, token string, debtor, creditor string, amount struct {
-	dollars int
-	cents   int
+func createDebt(client *http.Client, groupID, token string, debtor, creditor string, title string, amount struct {
+	Dollars int `json:"dollars"`
+	Cents   int `json:"cents"`
 },
 ) string {
-	return ""
+	var params createDebtParameters
+
+	params.GroupID = groupID
+	params.Title = title
+	params.Creditor = creditor
+	params.Transactions = append(params.Transactions, debtRecord{
+		Debtor: debtor,
+		Amount: amount,
+	})
+	reqBody, err := json.Marshal(params)
+	if err != nil {
+		return ""
+	}
+
+	resp, status := doRequest(client, "POST", "/transaction", reqBody, token)
+	if status != 200 {
+		fmt.Println("status" + strconv.Itoa(status))
+		return ""
+	}
+	var respBody struct {
+		TransactionID uuid.UUID       `json:"transaction_id"`
+		Transactions  []database.Debt `json:"transactions,omitempty"`
+	}
+	respBytes, _ := io.ReadAll(resp.Body)
+	json.Unmarshal(respBytes, &respBody)
+	return respBody.TransactionID.String()
 }
 
 func getGroupMembers(client *http.Client, groupID, token string) []string {

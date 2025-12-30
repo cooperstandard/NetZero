@@ -30,4 +30,3 @@ func createAndLoginUser(client *http.Client, email, password, name string) route
 
 	return user
 }
-
