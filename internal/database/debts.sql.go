@@ -13,7 +13,7 @@ import (
 
 const createDebt = `-- name: CreateDebt :one
 INSERT INTO debts (id, amount, transaction_id, debtor, creditor, created_at, updated_at)
-    VALUES (gen_new_uuid(), $1, $2, $3, $4, NOW(), NOW())
+    VALUES (gen_random_uuid(), $1, $2, $3, $4, NOW(), NOW())
 RETURNING
     id, amount, transaction_id, debtor, creditor, created_at, updated_at, paid
 `

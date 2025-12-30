@@ -78,7 +78,7 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 		}
 		transactionID = transaction.ID
 	}
-	resultChan := make(chan addDebtResult)
+	resultChan := make(chan addDebtResult, len(params.Transactions))
 	var succeeded []database.Debt
 
 	for _, v := range params.Transactions {
@@ -96,6 +96,7 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 					CreditorID: debt.Creditor,
 				})
 				if err != nil {
+
 					resultChan <- addDebtResult{err: err, failedDebt: debt}
 					return
 				}
@@ -111,7 +112,7 @@ func (cfg *APIConfig) HandleCreateTransactions(w http.ResponseWriter, r *http.Re
 
 	for range len(params.Transactions) {
 		result := <-resultChan
-		if result.err != nil {
+		if result.err == nil {
 			succeeded = append(succeeded, result.recordedDebt)
 		} else {
 			util.RespondWithError(w, 405, "unable to create debt", nil)
