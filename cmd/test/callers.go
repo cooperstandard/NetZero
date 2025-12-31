@@ -41,6 +41,24 @@ func createGroup(client *http.Client, groupName string, token string) (routes.Gr
 	return group, nil
 }
 
+func getTransactions(client *http.Client, token string, groupID string) []string {
+
+	resp, status := doRequest(client, "POST", "/transaction?"+groupID, nil, token)
+	if status != 200 {
+		return []string{}
+	}
+
+	respBody, _ := io.ReadAll(resp.Body)
+
+	var transactions []database.Transaction
+	json.Unmarshal(respBody, &transactions)
+	ids := []string{}
+	for _, v := range transactions {
+		ids = append(ids, v.ID.String())
+	}
+	return ids
+}
+
 func createDebt(client *http.Client, groupID, token string, debtor, creditor string, title string, amount struct {
 	Dollars int `json:"dollars"`
 	Cents   int `json:"cents"`

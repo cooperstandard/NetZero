@@ -43,7 +43,6 @@ type createDebtParameters struct {
 // main is the entry point of the functional test suite
 func main() {
 	/*TODO: run some golden test cases here
-	  		07) check transaction record for user 1 and user 2
 	  		08) create a debt for user 1
 	    	09) check that transaction record and balances are as expected for user 1 and user 2
 	  		10) add another debt for user 1, verify everything is as expected
@@ -125,4 +124,9 @@ func main() {
 		log.Fatal("failed to create debt")
 	}
 	log.Info("successfully created debt", "debtID", debtID)
+
+	// 07) check transaction record for user 1 and user 2
+	transactionIDs := getTransactions(client, user1.Token, group1.ID.String())
+	log.Info("transaction IDS", transactionIDs)
+
 }
