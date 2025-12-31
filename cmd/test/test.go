@@ -125,8 +125,11 @@ func main() {
 	}
 	log.Info("successfully created debt", "debtID", debtID)
 
-	// 07) check transaction record for user 1 and user 2
+	// 07) check transaction record for group 1 and group 2
 	transactionIDs := getTransactions(client, user1.Token, group1.ID.String())
-	log.Info("transaction IDS", transactionIDs)
+	log.Info("transaction in group 1", "IDs", transactionIDs)
+
+	transactionIDs = getTransactions(client, user1.Token, group2.ID.String())
+	log.Info("transaction in group 2", "IDs", transactionIDs)
 
 }

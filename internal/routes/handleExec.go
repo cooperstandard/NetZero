@@ -27,3 +27,7 @@ func (cfg *APIConfig) HandleReset(w http.ResponseWriter, r *http.Request) {
 func HandleHealth(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(204)
 }
+
+func (cfg *APIConfig) HandleMigration(w http.ResponseWriter, r *http.Request) {
+
+}

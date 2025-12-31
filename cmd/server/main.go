@@ -42,6 +42,10 @@ func main() {
 		log.Fatalf("goose: failed to set dialect: %v\n", err)
 	}
 
+	if os.Getenv("RELOAD_MIGRATIONS") == "true" && platform != "prod" {
+		goose.DownTo(dbConn, migrationsDir, 0)
+	} 
+
 	if err := goose.Up(dbConn, migrationsDir); err != nil {
 		log.Fatalf("goose: failed to apply migrations: %v\n", err)
 	}
@@ -80,6 +84,7 @@ func main() {
 
 	if apiCfg.Platform != "prod" {
 		paths[util.FormPath("POST", "/admin/reset", basePath)] = apiCfg.AdminAuthMiddleware(apiCfg.HandleReset)
+		paths[util.FormPath("POST", "/admin/migrate", basePath)] = apiCfg.AdminAuthMiddleware(apiCfg.HandleMigration)
 	}
 
 	// register routes
