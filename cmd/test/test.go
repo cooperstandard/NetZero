@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"slices"
 
 	"github.com/charmbracelet/log"
 
@@ -126,10 +127,15 @@ func main() {
 	log.Info("successfully created debt", "debtID", debtID)
 
 	// 07) check transaction record for group 1 and group 2
-	transactionIDs := getTransactions(client, user1.Token, group1.ID.String())
-	log.Info("transaction in group 1", "IDs", transactionIDs)
+	transactionIDsg1 := getTransactions(client, user1.Token, group1.ID.String())
+	log.Info("transaction in group 1", "IDs", transactionIDsg1)
 
-	transactionIDs = getTransactions(client, user1.Token, group2.ID.String())
-	log.Info("transaction in group 2", "IDs", transactionIDs)
+	transactionIDsg2 := getTransactions(client, user1.Token, group2.ID.String())
+	log.Info("transaction in group 2", "IDs", transactionIDsg2)
+
+	if slices.Equal(transactionIDsg1, transactionIDsg2) {
+		log.Fatal("group1 and group2 have the same transactions")
+
+	}
 
 }

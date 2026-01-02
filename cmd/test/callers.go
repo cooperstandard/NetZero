@@ -43,7 +43,7 @@ func createGroup(client *http.Client, groupName string, token string) (routes.Gr
 
 func getTransactions(client *http.Client, token string, groupID string) []string {
 
-	resp, status := doRequest(client, "GET", "/transactions?"+groupID, nil, token)
+	resp, status := doRequest(client, "GET", "/transactions?group_id="+groupID, nil, token)
 	if status != 200 {
 		return []string{}
 	}
