@@ -133,7 +133,7 @@ func (cfg *APIConfig) HandleGetTransactions(w http.ResponseWriter, r *http.Reque
 	groupID := r.URL.Query().Get("group_id")
 
 	if groupID != "" {
-		transactions, err := cfg.DB.GetTransactonsByAuthor(r.Context(), uuid.MustParse(groupID))
+		transactions, err := cfg.DB.GetTransactionsByGroup(r.Context(), uuid.MustParse(groupID))
 		if err != nil {
 			util.RespondWithError(w, 404, "unable to locate records", err)
 			return
