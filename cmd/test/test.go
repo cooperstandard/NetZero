@@ -138,4 +138,17 @@ func main() {
 
 	}
 
+	// 09) create a debt for user 1
+	// 10) check that transaction record and balances are as expected for user 1 and user 2
+	// 11) add another debt for user 1, verify everything is as expected
+	// 12) delete user 1 first debt
+	// 13) make sure the balance is correct
+	// 14) settle up user 1
+	// 15) make sure that the debt is marked as paid
+	// 16) make sure that user 2s debt is not paid yet
+	// 17) delete user 1s paid debt
+	// 18) make sure that user 2s balance is updated
+	// 19) settle up user 2, make sure that all balances are now 0
+	// 20) create user3, do some transactions between the users, make sure the record is right, settle up, make sure the record is right
+
 }

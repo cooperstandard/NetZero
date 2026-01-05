@@ -41,7 +41,7 @@ func (cfg *APIConfig) UserAuthMiddleware(next http.HandlerFunc) http.HandlerFunc
 
 func LogMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println(r.URL.String())
+		log.Println(r.Method + " " + r.URL.String())
 		next.ServeHTTP(w, r)
 	}
 
