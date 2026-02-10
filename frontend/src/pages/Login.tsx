@@ -50,7 +50,7 @@ const Login = () => {
               <input
                 id="email"
                 name="email"
-                type="email"
+                type="string"
                 autoComplete="email"
                 required
                 value={email}

@@ -28,7 +28,7 @@ const GroupDetail = () => {
       ]);
 
       setMembers(membersData);
-      setTransactions(transactionsData);
+      setTransactions(transactionsData ?? []);
 
       if (transactionsData.length > 0) {
         const transactionIds = transactionsData.map((t) => t.id);
